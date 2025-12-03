@@ -23,7 +23,8 @@ MANIFEST
 
 # Streamlit
 **/secrets.toml
-*.toml
+!**/.streamlit/config.toml
+
 
 
 # Virtual Environment
