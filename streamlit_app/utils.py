@@ -651,6 +651,12 @@ def load_css():
             backdrop-filter: blur(10px);
         }
 
+        .modal-text-content {
+            font-size: 0.95rem;
+            color: #cbd5e1 !important;
+            margin-bottom: 15px;
+        }
+
         /* Mobile Bottom Sheet Animation */
         @media (max-width: 768px) {
             .modal-overlay {
@@ -843,10 +849,10 @@ def get_card_html(row):
                 </div>
 
                 <div class="modal-section-title">🎁 Welcome Bonus</div>
-                <p style="font-size: 0.95rem; color: #555;">{row['welcome_bonus']}</p>
+                <p class="modal-text-content">{row['welcome_bonus']}</p>
 
                 <div class="modal-section-title">💰 Cashback & Rewards</div>
-                <p style="font-size: 0.95rem; color: #555;">{row['cashback_rates']}</p>
+                <p class="modal-text-content">{row['cashback_rates']}</p>
                 
                 <div class="modal-section-title">✨ Key Benefits</div>
                 <ul class="modal-benefits-list">
