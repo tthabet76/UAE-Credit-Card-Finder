@@ -89,66 +89,70 @@ with col3:
 
 st.markdown("---")
 
-# --- GRAPHS ---
+# --- GRAPHS ROW 1 ---
+c1, c2 = st.columns(2)
 
-# 1. Salary Requirement Distribution
-st.markdown("### 💰 Salary Requirements")
-st.markdown("Count of cards available for different salary brackets.")
+with c1:
+    # 1. Salary Requirement Distribution
+    st.markdown("### 💰 Salary Requirements")
+    st.markdown("Count of cards available for different salary brackets.")
 
-# Binning logic
-bins = [0, 5000, 10000, 20000, float('inf')]
-labels = ['< 5k', '5k - 10k', '10k - 20k', '> 20k']
-df['Salary_Bracket'] = pd.cut(df['min_salary_numeric'], bins=bins, labels=labels, right=False)
+    # Binning logic
+    bins = [0, 5000, 10000, 20000, float('inf')]
+    labels = ['< 5k', '5k - 10k', '10k - 20k', '> 20k']
+    df['Salary_Bracket'] = pd.cut(df['min_salary_numeric'], bins=bins, labels=labels, right=False)
 
-salary_counts = df['Salary_Bracket'].value_counts().reindex(labels).reset_index()
-salary_counts.columns = ['Salary Bracket', 'Count']
+    salary_counts = df['Salary_Bracket'].value_counts().reindex(labels).reset_index()
+    salary_counts.columns = ['Salary Bracket', 'Count']
 
-fig_salary = px.bar(
-    salary_counts, 
-    x='Salary Bracket', 
-    y='Count',
-    text='Count',
-    color='Count',
-    color_continuous_scale='Blues',
-    template='plotly_dark'
-)
-fig_salary.update_layout(
-    plot_bgcolor='rgba(0,0,0,0)',
-    paper_bgcolor='rgba(0,0,0,0)',
-    font_family="Outfit",
-    showlegend=False
-)
-fig_salary.update_traces(textposition='outside')
+    fig_salary = px.bar(
+        salary_counts, 
+        x='Salary Bracket', 
+        y='Count',
+        text='Count',
+        color='Count',
+        color_continuous_scale='Blues',
+        template='plotly_dark'
+    )
+    fig_salary.update_layout(
+        plot_bgcolor='rgba(0,0,0,0)',
+        paper_bgcolor='rgba(0,0,0,0)',
+        font_family="Outfit",
+        showlegend=False,
+        margin=dict(l=20, r=20, t=40, b=20)
+    )
+    fig_salary.update_traces(textposition='outside')
 
-with st.container():
-    st.markdown('<div class="graph-container">', unsafe_allow_html=True)
-    st.plotly_chart(fig_salary, use_container_width=True)
-    st.markdown('</div>', unsafe_allow_html=True)
+    with st.container():
+        st.markdown('<div class="graph-container">', unsafe_allow_html=True)
+        st.plotly_chart(fig_salary, use_container_width=True)
+        st.markdown('</div>', unsafe_allow_html=True)
 
+with c2:
+    # 2. Cashback Comparison
+    st.markdown("### 💸 Cashback Analysis")
+    st.markdown("Distribution of maximum cashback rates across all cards.")
 
-# 2. Cashback Comparison
-st.markdown("### 💸 Cashback Analysis")
-st.markdown("Distribution of maximum cashback rates across all cards.")
+    fig_cashback = px.histogram(
+        df, 
+        x='max_cashback_rate', 
+        nbins=20,
+        labels={'max_cashback_rate': 'Max Cashback Rate (%)'},
+        color_discrete_sequence=['#8b5cf6'], # Violet
+        template='plotly_dark'
+    )
+    fig_cashback.update_layout(
+        plot_bgcolor='rgba(0,0,0,0)',
+        paper_bgcolor='rgba(0,0,0,0)',
+        font_family="Outfit",
+        bargap=0.1,
+        margin=dict(l=20, r=20, t=40, b=20)
+    )
 
-fig_cashback = px.histogram(
-    df, 
-    x='max_cashback_rate', 
-    nbins=20,
-    labels={'max_cashback_rate': 'Max Cashback Rate (%)'},
-    color_discrete_sequence=['#8b5cf6'], # Violet
-    template='plotly_dark'
-)
-fig_cashback.update_layout(
-    plot_bgcolor='rgba(0,0,0,0)',
-    paper_bgcolor='rgba(0,0,0,0)',
-    font_family="Outfit",
-    bargap=0.1
-)
-
-with st.container():
-    st.markdown('<div class="graph-container">', unsafe_allow_html=True)
-    st.plotly_chart(fig_cashback, use_container_width=True)
-    st.markdown('</div>', unsafe_allow_html=True)
+    with st.container():
+        st.markdown('<div class="graph-container">', unsafe_allow_html=True)
+        st.plotly_chart(fig_cashback, use_container_width=True)
+        st.markdown('</div>', unsafe_allow_html=True)
 
 
 # 3. Cards per Bank
