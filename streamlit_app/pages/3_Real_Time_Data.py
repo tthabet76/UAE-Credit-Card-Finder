@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
-from utils import load_css
+from utils import load_css, get_card_html
 from db_utils import get_db_connection
 
 # --- PAGE CONFIGURATION ---
@@ -55,13 +55,7 @@ def load_data():
         if not conn:
             return pd.DataFrame()
             
-        query = """
-        SELECT 
-            bank_name, 
-            min_salary_numeric, 
-            max_cashback_rate 
-        FROM credit_cards_details
-        """
+        query = "SELECT * FROM credit_cards_details"
         df = pd.read_sql_query(query, conn)
         conn.close()
         return df
@@ -125,8 +119,35 @@ with c1:
 
     with st.container():
         st.markdown('<div class="graph-container">', unsafe_allow_html=True)
-        st.plotly_chart(fig_salary, use_container_width=True)
+        # Enable selection events
+        event = st.plotly_chart(fig_salary, use_container_width=True, on_select="rerun", selection_mode="points")
         st.markdown('</div>', unsafe_allow_html=True)
+
+    # --- INTERACTION LOGIC ---
+    if event and len(event.selection["points"]) > 0:
+        selected_point = event.selection["points"][0]
+        # The x-value corresponds to the Salary Bracket label (e.g., "10k - 20k")
+        selected_bracket = selected_point["x"]
+        
+        st.markdown(f"### 🎯 Featured Cards: {selected_bracket}")
+        
+        # Filter logic based on the bracket
+        filtered_cards = pd.DataFrame()
+        if selected_bracket == '< 5k':
+            filtered_cards = df[df['min_salary_numeric'] < 5000]
+        elif selected_bracket == '5k - 10k':
+            filtered_cards = df[(df['min_salary_numeric'] >= 5000) & (df['min_salary_numeric'] < 10000)]
+        elif selected_bracket == '10k - 20k':
+            filtered_cards = df[(df['min_salary_numeric'] >= 10000) & (df['min_salary_numeric'] < 20000)]
+        elif selected_bracket == '> 20k':
+            filtered_cards = df[df['min_salary_numeric'] >= 20000]
+            
+        if not filtered_cards.empty:
+            # Show top 6 cards
+            for idx, row in filtered_cards.head(6).iterrows():
+                st.markdown(get_card_html(row), unsafe_allow_html=True)
+        else:
+            st.info("No specific cards found for this range.")
 
 with c2:
     # 2. Cashback Comparison
