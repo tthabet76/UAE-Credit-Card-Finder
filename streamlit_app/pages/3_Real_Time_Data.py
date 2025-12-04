@@ -1,9 +1,8 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
-import sqlite3
-import os
 from utils import load_css
+from db_utils import get_db_connection
 
 # --- PAGE CONFIGURATION ---
 st.set_page_config(
@@ -52,10 +51,10 @@ st.markdown("""
 @st.cache_data
 def load_data():
     try:
-        # Connect to DB (adjust path if needed, assuming it's in root)
-        db_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'credit_card_data.db')
-        conn = sqlite3.connect(db_path)
-        
+        conn = get_db_connection()
+        if not conn:
+            return pd.DataFrame()
+            
         query = """
         SELECT 
             bank_name, 
