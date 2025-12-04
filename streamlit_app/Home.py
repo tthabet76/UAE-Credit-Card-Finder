@@ -146,27 +146,33 @@ col1, col2, col3 = st.columns(3)
 
 with col1:
     st.markdown("""
-    <div class="card-container" style="text-align: center;">
-        <div style="font-size: 2.5rem; margin-bottom: 10px; text-shadow: 0 0 15px rgba(6, 182, 212, 0.5);">🔍</div>
-        <h3 style="margin: 10px 0; color: #f8fafc;">Smart Comparison</h3>
-        <p style="color: #94a3b8;">Filter by minimum salary, annual fees, and specific benefits like lounge access or cashback.</p>
-    </div>
+    <a href="Compare_Cards" target="_self" style="text-decoration: none;">
+        <div class="card-container" style="text-align: center;">
+            <div style="font-size: 2.5rem; margin-bottom: 10px; text-shadow: 0 0 15px rgba(6, 182, 212, 0.5);">🔍</div>
+            <h3 style="margin: 10px 0; color: #f8fafc;">Smart Comparison</h3>
+            <p style="color: #94a3b8;">Filter by minimum salary, annual fees, and specific benefits like lounge access or cashback.</p>
+        </div>
+    </a>
     """, unsafe_allow_html=True)
 
 with col2:
     st.markdown("""
-    <div class="card-container" style="text-align: center;">
-        <div style="font-size: 2.5rem; margin-bottom: 10px; text-shadow: 0 0 15px rgba(139, 92, 246, 0.5);">🤖</div>
-        <h3 style="margin: 10px 0; color: #f8fafc;">AI Assistant</h3>
-        <p style="color: #94a3b8;">Not sure what you need? Tell our AI about your spending habits and get tailored advice.</p>
-    </div>
+    <a href="AI_Assistant" target="_self" style="text-decoration: none;">
+        <div class="card-container" style="text-align: center;">
+            <div style="font-size: 2.5rem; margin-bottom: 10px; text-shadow: 0 0 15px rgba(139, 92, 246, 0.5);">🤖</div>
+            <h3 style="margin: 10px 0; color: #f8fafc;">AI Assistant</h3>
+            <p style="color: #94a3b8;">Not sure what you need? Tell our AI about your spending habits and get tailored advice.</p>
+        </div>
+    </a>
     """, unsafe_allow_html=True)
 
 with col3:
     st.markdown("""
-    <div class="card-container" style="text-align: center;">
-        <div style="font-size: 2.5rem; margin-bottom: 10px; text-shadow: 0 0 15px rgba(6, 182, 212, 0.5);">📊</div>
-        <h3 style="margin: 10px 0; color: #f8fafc;">Real-time Data</h3>
-        <p style="color: #94a3b8;">Up-to-date information on interest rates, fees, and limited-time offers from top UAE banks.</p>
-    </div>
+    <a href="Real_Time_Data" target="_self" style="text-decoration: none;">
+        <div class="card-container" style="text-align: center;">
+            <div style="font-size: 2.5rem; margin-bottom: 10px; text-shadow: 0 0 15px rgba(6, 182, 212, 0.5);">📊</div>
+            <h3 style="margin: 10px 0; color: #f8fafc;">Real-time Data</h3>
+            <p style="color: #94a3b8;">Up-to-date information on interest rates, fees, and limited-time offers from top UAE banks.</p>
+        </div>
+    </a>
     """, unsafe_allow_html=True)
