@@ -122,7 +122,7 @@ col1, col2 = st.columns([1.5, 1])
 with col1:
     st.markdown("""
         <div class="hero-container">
-            <h1 class="hero-title">The Future of <br/><span class="highlight">Smart Spending</span></h1>
+            <h1 class="hero-title"><span class="highlight">The Future of Smart Spending Using AI</span></h1>
             <p class="hero-subtitle">Stop guessing. Compare interest rates, rewards, and fees side-by-side with our interactive tools built on Streamlit.</p>
         </div>
     """, unsafe_allow_html=True)
