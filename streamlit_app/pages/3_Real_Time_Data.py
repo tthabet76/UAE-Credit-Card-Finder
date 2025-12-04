@@ -109,7 +109,7 @@ fig_salary = px.bar(
     y='Count',
     text='Count',
     color='Count',
-    color_continuous_scale='Cyan',
+    color_continuous_scale='Blues',
     template='plotly_dark'
 )
 fig_salary.update_layout(
@@ -165,7 +165,7 @@ fig_bank = px.bar(
     orientation='h',
     text='Count',
     color='Count',
-    color_continuous_scale='Teal',
+    color_continuous_scale='Tealgrn',
     template='plotly_dark'
 )
 fig_bank.update_layout(
