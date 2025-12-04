@@ -131,7 +131,8 @@ with col1:
 with col2:
     st.metric("Banks Monitored", df['bank_name'].nunique())
 with col3:
-    st.metric("Avg Max Cashback", f"{df['max_cashback_rate'].mean():.1f}%")
+    avg_cards = len(df) / df['bank_name'].nunique() if df['bank_name'].nunique() > 0 else 0
+    st.metric("Avg Cards per Bank", f"{avg_cards:.1f}")
 
 st.markdown("---")
 
