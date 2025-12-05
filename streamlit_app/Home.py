@@ -147,10 +147,10 @@ st.markdown("""
     /* Increased breakpoint to 768px to catch more devices */
     @media only screen and (max-width: 768px) {
         .hero-title {
-            font-size: 1.8rem !important; /* Aggressive reduction (approx 50% of desktop) */
+            font-size: 1.2rem !important; /* Further reduced (approx 30% less than 1.8rem) */
         }
         .hero-subtitle {
-            font-size: 0.9rem !important;
+            font-size: 0.8rem !important;
             margin-bottom: 1rem;
         }
     }
