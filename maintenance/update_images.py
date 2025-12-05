@@ -14,7 +14,7 @@ from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from urllib.parse import urlparse
+from urllib.parse import urlparse, parse_qs, unquote
 
 # --- CONFIGURATION ---
 from dotenv import load_dotenv
@@ -60,7 +60,73 @@ def get_cards_needing_images(database_file):
     conn.close()
     return [dict(row) for row in rows]
 
-def extract_image_url(driver, bank_name, current_url):
+def extract_nextjs_url(tag):
+    """Helper to extract URL from Next.js img tag."""
+    try:
+        # Extract srcset
+        srcset_match = re.search(r'srcSet=["\']([^"\']+)["\']', tag, re.IGNORECASE)
+        if srcset_match:
+            srcset = srcset_match.group(1)
+            
+            # Take the last URL in srcset (highest res)
+            parts = srcset.split(",")
+            if parts:
+                last_part = parts[-1].strip()
+                target_url = last_part.split(" ")[0]
+                
+                # Handle Next.js optimized images
+                if "/_next/image" in target_url:
+                    target_url = target_url.replace("&amp;", "&")
+                    parsed = urlparse(target_url)
+                    qs = parse_qs(parsed.query)
+                    if 'url' in qs:
+                        extracted = qs['url'][0]
+                        
+                        # Fix localhost issue (sometimes appears in extracted URL)
+                        if "localhost" in extracted:
+                            extracted = extracted.replace("http://localhost:80", "https://www.rakbank.ae")
+                            extracted = extracted.replace("http://localhost", "https://www.rakbank.ae")
+                        
+                        # If relative, prepend domain
+                        if extracted.startswith("/"):
+                            return f"https://www.rakbank.ae{extracted}"
+                        return extracted
+                else:
+                    return target_url
+    except:
+        pass
+    return None
+
+def extract_rakbank_image(driver, card_name):
+    """
+    Specific logic for RAKBANK using Regex on page source to find Next.js images.
+    """
+    try:
+        src_code = driver.page_source
+        
+        # Find all img tags
+        img_tags = re.findall(r'<img[^>]+>', src_code)
+        
+        # Priority 1: Match card name in alt
+        for tag in img_tags:
+            if card_name.lower() in tag.lower():
+                url = extract_nextjs_url(tag)
+                if url: return url
+        
+        # Priority 2: Match any alt containing 'card' (case insensitive)
+        # This covers 'card', 'Air Arabia Card', 'World Card', etc.
+        for tag in img_tags:
+            if 'card' in tag.lower():
+                # Verify it has an alt attribute containing 'card'
+                if re.search(r'alt=["\'][^"\']*card[^"\']*["\']', tag, re.IGNORECASE):
+                    url = extract_nextjs_url(tag)
+                    if url: return url
+                
+    except Exception as e:
+        print(f"  Error in RAKBANK extraction: {e}")
+    return None
+
+def extract_image_url(driver, bank_name, current_url, card_name):
     """
     The core logic for finding the image.
     Contains both GENERIC and BANK-SPECIFIC strategies.
@@ -68,40 +134,122 @@ def extract_image_url(driver, bank_name, current_url):
     extracted_image_url = None
     
     try:
-        # --- STRATEGY 1: Generic Meta Tags (Works for 80% of sites) ---
+        # --- STRATEGY 1: Bank Specific Logic (Priority) ---
+        
+        if bank_name == 'RAKBANK':
+            extracted_image_url = extract_rakbank_image(driver, card_name)
+            if extracted_image_url:
+                return extracted_image_url
+
+        # --- STRATEGY 2: Generic Meta Tags (Works for 80% of sites) ---
         # Try og:image
         meta_og_img = driver.find_elements(By.XPATH, '//meta[@property="og:image"]')
         if meta_og_img:
             extracted_image_url = meta_og_img[0].get_attribute('content')
+            # If generic extraction returns [object Object] (RAKBANK issue), discard it
+            if extracted_image_url == '[object Object]':
+                extracted_image_url = None
         
         # Fallback to twitter:image
         if not extracted_image_url:
             meta_tw_img = driver.find_elements(By.XPATH, '//meta[@name="twitter:image"]')
             if meta_tw_img:
                 extracted_image_url = meta_tw_img[0].get_attribute('content')
+                if extracted_image_url == '[object Object]':
+                    extracted_image_url = None
 
-        # --- STRATEGY 2: Bank Specific Logic ---
+        # --- STRATEGY 3: Post-Processing Bank Specific Logic ---
         
         # [Emirates Islamic] - Tile Image Construction
-        if bank_name == 'Emirates Islamic' and extracted_image_url:
+        # [Emirates Islamic] - Search for 'mobile-image' or matching Alt text
+        if bank_name == 'Emirates Islamic':
             try:
-                # The og:image is usually a banner. We want the tile.
-                # Example Banner: .../banners/credit-card-banners/skywards_black_credit_card_1920x650_en.jpg
-                # Target Tile:    .../tile-images/skywards_black_credit_card_550x346.png
+                # Priority 1: Search for img with 'mobile-image' in src AND card name in alt
+                imgs = driver.find_elements(By.TAG_NAME, "img")
+                best_candidate = None
                 
-                # 1. Replace the path
-                if 'banners/credit-card-banners' in extracted_image_url:
-                    constructed_url = extracted_image_url.replace('banners/credit-card-banners', 'tile-images')
+                for img in imgs:
+                    src = img.get_attribute("src")
+                    alt = img.get_attribute("alt")
                     
-                    # 2. Replace the dimensions/extension
-                    # Regex to find _123x456... and replace with _550x346.png
-                    constructed_url = re.sub(r'_\d+x\d+.*$', '_550x346.png', constructed_url)
+                    if not src: continue
                     
-                    extracted_image_url = constructed_url
+                    # Check for 'mobile-image' which seems to be the card tile
+                    if 'mobile-image' in src:
+                        # If alt matches card name, this is definitely it
+                        if alt and card_name.lower() in alt.lower():
+                            extracted_image_url = src
+                            break
+                        # Otherwise keep it as a candidate
+                        best_candidate = src
+                    
+                    # Fallback: Check for 'tile-images'
+                    elif 'tile-images' in src:
+                         if alt and card_name.lower() in alt.lower():
+                            extracted_image_url = src
+                            break
+                         if not best_candidate:
+                             best_candidate = src
+
+                # If we didn't find a perfect match but found a candidate, use it
+                if not extracted_image_url and best_candidate:
+                    extracted_image_url = best_candidate
+                    
             except Exception as e:
                 print(f"  Error applying Emirates Islamic logic: {e}")
 
-        # Add other bank logic here...
+        # [Mashreq] - Robust JS Extraction & Resolution Priority
+        if bank_name == 'Mashreq':
+            try:
+                # Use JS to get all images safely
+                images_data = driver.execute_script("""
+                    var imgs = document.getElementsByTagName("img");
+                    var result = [];
+                    for (var i = 0; i < imgs.length; i++) {
+                        result.push({
+                            src: imgs[i].src,
+                            alt: imgs[i].alt || ""
+                        });
+                    }
+                    return result;
+                """)
+                
+                best_candidate = None
+                max_res = 0
+                
+                for img in images_data:
+                    src = img.get('src', '')
+                    alt = img.get('alt', '')
+                    
+                    if not src: continue
+                    
+                    # Check if alt contains card name (relaxed match)
+                    card_name_parts = card_name.lower().split()
+                    match_score = sum(1 for part in card_name_parts if part in alt.lower())
+                    
+                    # If good match (e.g. > 50% of words match)
+                    if match_score >= len(card_name_parts) / 2:
+                        # Check resolution in URL (e.g. 360x315)
+                        res_match = re.search(r'(\d+)x(\d+)', src)
+                        if res_match:
+                            width = int(res_match.group(1))
+                            height = int(res_match.group(2))
+                            resolution = width * height
+                            
+                            if resolution > max_res:
+                                max_res = resolution
+                                best_candidate = src
+                        else:
+                            # If no resolution in URL, but matches text, keep if we have nothing else
+                            if not best_candidate:
+                                best_candidate = src
+                
+                if best_candidate:
+                    extracted_image_url = best_candidate
+                    # print(f"  > Found better Mashreq image: {extracted_image_url}")
+
+            except Exception as e:
+                print(f"  Error applying Mashreq logic: {e}")
 
     except Exception as e:
         print(f"  Error extracting image: {e}")
@@ -162,7 +310,7 @@ def run_image_updater():
                 except:
                     pass
                 
-                image_url = extract_image_url(driver, card['bank_name'], card['url'])
+                image_url = extract_image_url(driver, card['bank_name'], card['url'], card['card_name'])
                 
                 if image_url:
                     # print(f"  Found: {image_url}")

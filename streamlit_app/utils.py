@@ -150,6 +150,32 @@ def load_css():
             justify-content: center;
             margin-bottom: 10px;
         }}
+
+        /* --- INPUT FIELDS FIX --- */
+        /* Force inputs to match theme */
+        input, .stTextInput input, .stNumberInput input, .stSelectbox input {{
+            color: #333333 !important;
+            caret-color: #333333 !important;
+        }}
+        
+        /* Fix for Selectbox dropdown text */
+        div[data-baseweb="select"] > div {{
+            color: #333333 !important;
+        }}
+        
+        /* Fix for Number Input buttons (+/-) */
+        button[kind="secondary"] {{
+            color: #333333 !important;
+            border-color: rgba(0,0,0,0.1) !important;
+        }}
+        
+        /* Force SVG icons (plus/minus) to be dark */
+        button[kind="secondary"] svg,
+        button[kind="secondary"] svg path {{
+            fill: #333333 !important;
+            stroke: #333333 !important;
+            color: #333333 !important;
+        }}
         .mini-card img {{
             max-width: 100%;
             max-height: 100%;
@@ -629,17 +655,29 @@ import sqlite3
 @st.cache_data(ttl=3600)
 def get_card_image_from_db(card_id):
     """
-    Fetches image filename from the database (Cached).
+    Fetches image source from the database (Cached).
+    Prioritizes scraper_image_url, then local_filename.
     Returns None if not found.
     """
     db_path = os.path.join(os.path.dirname(__file__), '..', 'credit_card_data.db')
     try:
         conn = sqlite3.connect(db_path)
         cursor = conn.cursor()
-        cursor.execute("SELECT local_filename FROM card_images WHERE card_id = ?", (card_id,))
+        # Select both columns
+        cursor.execute("SELECT scraper_image_url, local_filename FROM card_images WHERE card_id = ?", (card_id,))
         result = cursor.fetchone()
         conn.close()
-        return result[0] if result else None
+        
+        if result:
+            scraper_url, local_filename = result
+            # Priority 1: Local Filename (Manual Override)
+            if local_filename and local_filename.strip():
+                return local_filename
+            # Priority 2: Scraper URL
+            if scraper_url and scraper_url.strip():
+                return scraper_url
+                
+        return None
     except Exception as e:
         # print(f"DB Error: {e}")
         return None
@@ -651,25 +689,29 @@ def get_image_base64_cached(file_path):
 
 def get_card_image_source(row):
     """
-    Finds the image and returns a Base64 string source for HTML.
+    Finds the image and returns a source string (URL or Base64) for HTML.
     """
     card_id = str(row['id'])
     
-    # 1. Try Database
-    filename = get_card_image_from_db(card_id)
+    # 1. Try Database (returns URL or Filename)
+    image_source = get_card_image_from_db(card_id)
         
     # Handle Generic
-    if filename == "Generic Card":
+    if image_source == "Generic Card":
         return "https://via.placeholder.com/300x180?text=Generic+Card"
     
-    # 2. If no filename, return placeholder
-    if not filename:
+    # 2. If no source, return placeholder
+    if not image_source:
         return "https://via.placeholder.com/300x180?text=No+Image"
         
-    # 3. Construct absolute file path
+    # 3. If it's a URL (starts with http), return it directly
+    if image_source.startswith("http"):
+        return image_source
+        
+    # 4. If it's a filename, construct absolute file path and get Base64
     # utils.py is in streamlit_app/, images are in streamlit_app/static/cards/
     current_dir = os.path.dirname(__file__)
-    file_path = os.path.join(current_dir, 'static', 'cards', filename)
+    file_path = os.path.join(current_dir, 'static', 'cards', image_source)
     
     if os.path.exists(file_path):
         return get_image_base64_cached(file_path)

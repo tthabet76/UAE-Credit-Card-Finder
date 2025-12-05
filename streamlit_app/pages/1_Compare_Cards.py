@@ -105,7 +105,29 @@ st.sidebar.markdown("---")
 st.sidebar.subheader("💰 Salary Requirement")
 
 # Salary Filter
-user_salary = st.sidebar.number_input("Enter your Monthly Salary (AED)", min_value=0, step=1000, value=0)
+if 'salary_input' not in st.session_state:
+    st.session_state.salary_input = 0
+
+def decrease_salary():
+    st.session_state.salary_input = max(0, st.session_state.salary_input - 1000)
+
+def increase_salary():
+    st.session_state.salary_input += 1000
+
+col_minus, col_input, col_plus = st.sidebar.columns([1, 2, 1])
+
+with col_minus:
+    st.button("➖", key="btn_minus", on_click=decrease_salary, use_container_width=True)
+
+with col_input:
+    # Use the same key 'salary_input' so changes to state reflect in widget and vice versa
+    st.number_input("Monthly Salary (AED)", min_value=0, step=1000, key="salary_input", label_visibility="collapsed")
+
+with col_plus:
+    st.button("➕", key="btn_plus", on_click=increase_salary, use_container_width=True)
+
+# Use the session state value for filtering
+user_salary = st.session_state.salary_input
 show_higher_salary = st.sidebar.checkbox("Show cards requiring HIGHER salary", value=False)
 
 # Sort Option
