@@ -144,13 +144,13 @@ st.markdown("""
     }
 
     /* --- MOBILE ADJUSTMENTS --- */
-    /* This rule only applies on screens narrower than 600px */
-    @media only screen and (max-width: 600px) {
+    /* Increased breakpoint to 768px to catch more devices */
+    @media only screen and (max-width: 768px) {
         .hero-title {
-            font-size: 2.5rem !important; /* Much smaller on mobile */
+            font-size: 1.8rem !important; /* Aggressive reduction (approx 50% of desktop) */
         }
         .hero-subtitle {
-            font-size: 1rem !important; /* Slightly smaller subtitle */
+            font-size: 0.9rem !important;
             margin-bottom: 1rem;
         }
     }
