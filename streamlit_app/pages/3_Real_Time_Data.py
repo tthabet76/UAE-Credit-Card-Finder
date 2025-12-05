@@ -144,9 +144,17 @@ with c2:
 
     # Manual Binning for Cashback to enable Click Interaction
     # Bins: 0-1%, 1-3%, 3-5%, 5%+
-    cb_bins = [0, 1, 3, 5, float('inf')]
-    cb_labels = ['0-1%', '1-3%', '3-5%', '5%+']
-    df['Cashback_Bracket'] = pd.cut(df['max_cashback_rate'], bins=cb_bins, labels=cb_labels, right=False)
+    # Custom Binning for Cashback
+    # Bins: 0%, >0-1%, 1-3%, 3-5%, >5%
+    def get_cashback_bracket(rate):
+        if rate == 0: return '0%'
+        elif rate <= 1: return '>0-1%'
+        elif rate <= 3: return '1-3%'
+        elif rate <= 5: return '3-5%'
+        else: return '>5%'
+
+    df['Cashback_Bracket'] = df['max_cashback_rate'].apply(get_cashback_bracket)
+    cb_labels = ['0%', '>0-1%', '1-3%', '3-5%', '>5%']
     
     cashback_counts = df['Cashback_Bracket'].value_counts().reindex(cb_labels).reset_index()
     cashback_counts.columns = ['Cashback Bracket', 'Count']
@@ -183,14 +191,16 @@ with c2:
         st.markdown(f"**Featured Cards ({selected_cb_bracket})**")
         
         filtered_cb_cards = pd.DataFrame()
-        if selected_cb_bracket == '0-1%':
-            filtered_cb_cards = df[df['max_cashback_rate'] < 1]
+        if selected_cb_bracket == '0%':
+            filtered_cb_cards = df[df['max_cashback_rate'] == 0]
+        elif selected_cb_bracket == '>0-1%':
+            filtered_cb_cards = df[(df['max_cashback_rate'] > 0) & (df['max_cashback_rate'] <= 1)]
         elif selected_cb_bracket == '1-3%':
-            filtered_cb_cards = df[(df['max_cashback_rate'] >= 1) & (df['max_cashback_rate'] < 3)]
+            filtered_cb_cards = df[(df['max_cashback_rate'] > 1) & (df['max_cashback_rate'] <= 3)]
         elif selected_cb_bracket == '3-5%':
-            filtered_cb_cards = df[(df['max_cashback_rate'] >= 3) & (df['max_cashback_rate'] < 5)]
-        elif selected_cb_bracket == '5%+':
-            filtered_cb_cards = df[df['max_cashback_rate'] >= 5]
+            filtered_cb_cards = df[(df['max_cashback_rate'] > 3) & (df['max_cashback_rate'] <= 5)]
+        elif selected_cb_bracket == '>5%':
+            filtered_cb_cards = df[df['max_cashback_rate'] > 5]
             
         if not filtered_cb_cards.empty:
             cols = st.columns(3)
