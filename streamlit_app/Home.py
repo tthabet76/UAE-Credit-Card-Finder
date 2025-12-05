@@ -2,12 +2,86 @@ import streamlit as st
 from utils import load_css
 
 # --- PAGE CONFIGURATION ---
+# Updated title as per user request
 st.set_page_config(
-    page_title="CardCompare - Smart Spending",
+    page_title="Smart Spending UAE",
     page_icon="💳",
     layout="wide",
     initial_sidebar_state="expanded"
 )
+
+# ==============================================
+# START OF NEWS TICKER CODE
+# ==============================================
+
+# --- 1. DAILY NEWS HEADLINES (LOADED FROM FILE) ---
+try:
+    with open('streamlit_app/news.txt', 'r') as f:
+        news_items = [line.strip() for line in f.readlines() if line.strip()]
+except FileNotFoundError:
+    news_items = [
+        "Welcome to Smart Spending UAE",
+        "Compare the best credit cards in the UAE",
+        "Update news.txt to change these headlines"
+    ]
+
+# Combine the items with a separator for display
+news_string = "  +++  ".join(news_items)
+
+# --- 2. NEWS TICKER COMPONENT (CSS & HTML INJECTION) ---
+st.markdown(
+    f"""
+    <style>
+    /* --- CSS STYLES START --- */
+    /* The Container: Defines the background area */
+    .ticker-wrap {{
+        width: 100%;
+        overflow: hidden; /* Hides text when it moves off-screen */
+        background-color: var(--card-bg); /* Dynamic Theme Background */
+        padding: 10px 0;
+        margin-bottom: 20px; /* Space before main title */
+        border-top: 1px solid var(--card-border);
+        border-bottom: 1px solid var(--card-border);
+        white-space: nowrap;
+        box-shadow: 0 4px 6px var(--shadow-color);
+    }}
+
+    /* The Moving Element: The block that scrolls */
+    .ticker {{
+        display: inline-block;
+        /* The animation: name, duration, curve, loop */
+        animation: ticker-scroll 35s linear infinite;
+        padding-left: 100%; /* Start off-screen right */
+    }}
+
+    /* The Text Styling */
+    .ticker-item {{
+        display: inline-block;
+        font-size: 1rem;
+        color: var(--text-primary); /* Dynamic Theme Text */
+        font-family: 'Outfit', sans-serif;
+        font-weight: 500;
+    }}
+
+    /* The Animation Keyframes: Defines movement from right to left */
+    @keyframes ticker-scroll {{
+        0% {{ transform: translate3d(0, 0, 0); visibility: visible; }}
+        100% {{ transform: translate3d(-100%, 0, 0); }}
+    }}
+    /* --- CSS STYLES END --- */
+    </style>
+
+    <div class="ticker-wrap">
+        <div class="ticker">
+            <div class="ticker-item">Latest Financial News: &nbsp;&nbsp; {news_string}</div>
+        </div>
+    </div>
+    """,
+    unsafe_allow_html=True
+)
+# ==============================================
+# END OF NEWS TICKER CODE
+# ==============================================
 
 # --- THEME TOGGLE ---
 if 'theme' not in st.session_state:
@@ -108,10 +182,6 @@ with col1:
     # Call to Action
     if st.button("Start Comparing Now", type="primary", use_container_width=True):
         st.switch_page("pages/1_Compare_Cards.py")
-
-    # Original functional button (hidden/secondary for now)
-    # if st.button("Start Comparing Now 🚀", type="primary", use_container_width=False):
-    #     st.switch_page("pages/1_Compare_Cards.py")
 
 with col2:
     # Display User's Custom Image Simply
