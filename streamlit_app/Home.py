@@ -10,6 +10,37 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
+# --- THEME TOGGLE (SIDEBAR TOP) ---
+if 'theme' not in st.session_state:
+    st.session_state.theme = 'dark'
+
+with st.sidebar:
+    def update_theme():
+        st.session_state.theme = 'dark' if st.session_state.theme_toggle else 'light'
+    
+    is_dark = st.session_state.theme == 'dark'
+    st.toggle("Dark Mode", value=is_dark, key="theme_toggle", on_change=update_theme)
+    st.markdown("---")
+    
+    # --- CSS HACK TO MOVE TOGGLE ABOVE NAV ---
+    st.markdown("""
+        <style>
+            /* Force the sidebar content to be a flex column */
+            [data-testid="stSidebar"] > div > div {
+                display: flex;
+                flex-direction: column;
+            }
+            /* Move the Navigation (Page List) to the bottom (order 2) */
+            [data-testid="stSidebarNav"] {
+                order: 2;
+            }
+            /* Move the User Content (Toggle) to the top (order 1) */
+            [data-testid="stSidebarUserContent"] {
+                order: 1;
+            }
+        </style>
+    """, unsafe_allow_html=True)
+
 # ==============================================
 # START OF NEWS TICKER CODE
 # ==============================================
@@ -83,20 +114,7 @@ st.markdown(
 # END OF NEWS TICKER CODE
 # ==============================================
 
-# --- THEME TOGGLE ---
-if 'theme' not in st.session_state:
-    st.session_state.theme = 'dark'
 
-# Create a container for the toggle to sit nicely
-toggle_col1, toggle_col2 = st.columns([6, 1])
-with toggle_col2:
-    # Use a callback to handle theme change immediately
-    def update_theme():
-        st.session_state.theme = 'dark' if st.session_state.theme_toggle else 'light'
-
-    # Initialize toggle value based on current state
-    is_dark = st.session_state.theme == 'dark'
-    st.toggle("Dark Mode", value=is_dark, key="theme_toggle", on_change=update_theme)
 
 # --- CUSTOM CSS & ANIMATION ---
 load_css()
@@ -104,10 +122,10 @@ load_css()
 # Hero Typography overrides for this page
 st.markdown("""
 <style>
-    /* Hero Typography */
+    /* Hero Typography - Default (Desktop) */
     .hero-title {
         font-family: 'Outfit', sans-serif;
-        font-size: 4rem;
+        font-size: 4rem; /* Big size for desktop */
         font-weight: 800;
         line-height: 1.1;
         color: var(--text-primary) !important;
@@ -123,6 +141,18 @@ st.markdown("""
     .highlight {
         color: var(--accent-primary) !important; /* Neon Cyan */
         text-shadow: 0 0 15px rgba(6, 182, 212, 0.5);
+    }
+
+    /* --- MOBILE ADJUSTMENTS --- */
+    /* This rule only applies on screens narrower than 600px */
+    @media only screen and (max-width: 600px) {
+        .hero-title {
+            font-size: 2.5rem !important; /* Much smaller on mobile */
+        }
+        .hero-subtitle {
+            font-size: 1rem !important; /* Slightly smaller subtitle */
+            margin-bottom: 1rem;
+        }
     }
 
     /* --- FINAL CTA BUTTON (Cosmic Pulse) --- */
