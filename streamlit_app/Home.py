@@ -9,96 +9,74 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
+# --- THEME TOGGLE ---
+if 'theme' not in st.session_state:
+    st.session_state.theme = 'dark'
+
+# Create a container for the toggle to sit nicely
+toggle_col1, toggle_col2 = st.columns([6, 1])
+with toggle_col2:
+    # Use a callback to handle theme change immediately
+    def update_theme():
+        st.session_state.theme = 'dark' if st.session_state.theme_toggle else 'light'
+
+    # Initialize toggle value based on current state
+    is_dark = st.session_state.theme == 'dark'
+    st.toggle("Dark Mode", value=is_dark, key="theme_toggle", on_change=update_theme)
+
 # --- CUSTOM CSS & ANIMATION ---
 load_css()
 
 # Hero Typography overrides for this page
 st.markdown("""
 <style>
-    /* --- HOME PAGE SPECIFIC DARK THEME OVERRIDES --- */
-    
-    /* Global Background - Deep Space Gradient */
-    .stApp {
-        background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%) !important;
-        background-attachment: fixed !important;
-    }
-    
-    /* Force text color for Home Page */
-    .stApp, .stApp p, .stApp div, .stApp span, .stApp label, .stApp li, .stApp td, .stApp th {
-        color: #e2e8f0 !important;
-    }
-    
-    /* Headings */
-    h1, h2, h3, h4, h5, h6, .stHeading {
-        color: #f8fafc !important;
-        text-shadow: 0 0 20px rgba(6, 182, 212, 0.1);
-    }
-
-    /* Card Container - Glassmorphism */
-    .card-container {
-        background: rgba(30, 41, 59, 0.7) !important;
-        backdrop-filter: blur(12px) !important;
-        border: 1px solid rgba(255, 255, 255, 0.1) !important;
-        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3) !important;
-    }
-    
-    /* Sidebar - Dark Theme for Home */
-    [data-testid="stSidebar"] {
-        background-color: #0f172a !important;
-        border-right: 1px solid rgba(255, 255, 255, 0.1) !important;
-    }
-    
-    [data-testid="stSidebar"] * {
-        color: #e2e8f0 !important;
-    }
-
     /* Hero Typography */
     .hero-title {
         font-family: 'Outfit', sans-serif;
         font-size: 4rem;
         font-weight: 800;
         line-height: 1.1;
-        color: #ffffff !important;
+        color: var(--text-primary) !important;
         margin-bottom: 1rem;
         text-shadow: 0 0 30px rgba(6, 182, 212, 0.2);
     }
     .hero-subtitle {
         font-size: 1.3rem;
-        color: #94a3b8 !important;
+        color: var(--text-secondary) !important;
         line-height: 1.6;
         margin-bottom: 2rem;
     }
     .highlight {
-        color: #06b6d4 !important; /* Neon Cyan */
+        color: var(--accent-primary) !important; /* Neon Cyan */
         text-shadow: 0 0 15px rgba(6, 182, 212, 0.5);
     }
 
-    /* --- FINAL CTA BUTTON (White Cosmic Pulse) --- */
+    /* --- FINAL CTA BUTTON (Cosmic Pulse) --- */
     /* Targeting the actual Streamlit button */
     div.stButton > button {
         position: relative;
         width: 100%;
         padding: 1rem 2rem !important;
-        background: #0f172a !important;
-        color: #ffffff !important;
+        background: var(--button-bg) !important;
+        color: var(--button-text) !important;
         text-decoration: none;
         text-transform: uppercase;
         font-family: 'Outfit', sans-serif;
         font-weight: 700;
         font-size: 1.2rem !important;
         letter-spacing: 2px;
-        border: 1px solid #ffffff !important;
+        border: 1px solid var(--button-border) !important;
         border-radius: 8px !important;
         overflow: hidden;
         transition: all 0.5s ease !important;
-        box-shadow: 0 0 10px rgba(255, 255, 255, 0.3), 0 0 30px rgba(255, 255, 255, 0.1) !important;
+        box-shadow: 0 0 10px var(--shadow-color) !important;
     }
 
     div.stButton > button:hover {
-        background: #ffffff !important;
-        color: #00008b !important; /* Dark Blue */
-        border-color: #ffffff !important;
-        box-shadow: 0 0 20px rgba(255, 255, 255, 0.8), 0 0 60px rgba(255, 255, 255, 0.6) !important;
+        background: var(--accent-primary) !important;
+        color: #ffffff !important;
+        border-color: var(--accent-primary) !important;
+        box-shadow: 0 0 20px var(--accent-primary), 0 0 60px var(--accent-primary) !important;
         transform: scale(1.02);
     }
 
@@ -106,7 +84,7 @@ st.markdown("""
     div.stButton > button:hover p,
     div.stButton > button:hover div,
     div.stButton > button:hover span {
-        color: #00008b !important;
+        color: #ffffff !important;
     }
 
     div.stButton > button:active {

@@ -27,8 +27,82 @@ if df.empty:
 st.sidebar.header("Filters")
 
 # Bank Filter
+# Bank Filter
 banks = sorted(df['bank_name'].unique().tolist())
-selected_banks = st.sidebar.pills("Select Bank", banks, selection_mode="multi")
+
+# Initialize selection state if not exists
+if 'selected_banks' not in st.session_state:
+    st.session_state.selected_banks = []
+
+# Top 5 Popular Banks (Adjust based on your data or preference)
+top_banks = ["ADCB", "ADIB", "Emirates NBD", "FAB", "Mashreq"]
+# Ensure top banks actually exist in the data
+top_banks = [b for b in top_banks if b in banks]
+
+st.sidebar.subheader("Select Bank")
+
+# 1. Render Top 5 Checkboxes
+for bank in top_banks:
+    is_checked = bank in st.session_state.selected_banks
+    if st.sidebar.checkbox(bank, value=is_checked, key=f"chk_{bank}"):
+        if bank not in st.session_state.selected_banks:
+            st.session_state.selected_banks.append(bank)
+    else:
+        if bank in st.session_state.selected_banks:
+            st.session_state.selected_banks.remove(bank)
+
+# 2. "See All" Modal Logic
+@st.dialog("Select Banks", width="large")
+def show_bank_selector():
+    st.write("Search and select multiple banks.")
+    
+    # Search Bar
+    search_query = st.text_input("Search Bank", placeholder="Type to search...", key="bank_search").lower()
+    
+    # Filter banks based on search
+    filtered_banks = [b for b in banks if search_query in b.lower()]
+    
+    # "Select All" / "Deselect All" for filtered results
+    col_tools = st.columns([0.3, 0.3, 0.4])
+    with col_tools[0]:
+        if st.button("Select All Visible", key="btn_select_all"):
+            for b in filtered_banks:
+                if b not in st.session_state.selected_banks:
+                    st.session_state.selected_banks.append(b)
+            st.rerun()
+            
+    with col_tools[1]:
+        if st.button("Clear Selection", key="btn_clear_all_banks"):
+            st.session_state.selected_banks = []
+            st.rerun()
+
+    st.markdown("---")
+
+    # Render Checkboxes in Grid
+    cols = st.columns(3)
+    for i, bank in enumerate(filtered_banks):
+        col = cols[i % 3]
+        with col:
+            is_selected = bank in st.session_state.selected_banks
+            if st.checkbox(bank, value=is_selected, key=f"modal_chk_{bank}"):
+                if bank not in st.session_state.selected_banks:
+                    st.session_state.selected_banks.append(bank)
+            else:
+                if bank in st.session_state.selected_banks:
+                    st.session_state.selected_banks.remove(bank)
+    
+    st.markdown("---")
+    if st.button("Apply Filters", type="primary", use_container_width=True):
+        st.rerun()
+
+if st.sidebar.button("See All Banks 🏦"):
+    show_bank_selector()
+
+# Use the session state for filtering
+selected_banks = st.session_state.selected_banks
+
+st.sidebar.markdown("---")
+st.sidebar.subheader("💰 Salary Requirement")
 
 # Salary Filter
 user_salary = st.sidebar.number_input("Enter your Monthly Salary (AED)", min_value=0, step=1000, value=0)
@@ -36,6 +110,7 @@ show_higher_salary = st.sidebar.checkbox("Show cards requiring HIGHER salary", v
 
 # Sort Option
 st.sidebar.markdown("---")
+st.sidebar.subheader("📊 Sorting")
 sort_by_cashback = st.sidebar.toggle("Sort by Highest Cashback Rate")
 
 # 4. Filter Logic
@@ -108,18 +183,7 @@ def clear_all_selections():
 @st.dialog("Compare Cards", width="large")
 def show_comparison_dialog():
     # Inject specific CSS for this dialog's button
-    st.markdown("""
-        <style>
-            div[data-testid="stDialog"] button {
-                background-color: #0f172a !important;
-                color: #ffffff !important;
-                border: 1px solid white !important;
-            }
-            div[data-testid="stDialog"] button p {
-                color: #ffffff !important;
-            }
-        </style>
-    """, unsafe_allow_html=True)
+    # Dialog CSS handled by utils.load_css
 
     if not st.session_state.selected_cards:
         st.warning("No cards selected.")

@@ -1,481 +1,399 @@
 import streamlit as st
 import os
+import base64
+import json
+import re
 
 def load_css():
-    st.markdown("""
+    # Initialize theme in session state if not present
+    if 'theme' not in st.session_state:
+        st.session_state.theme = 'dark'
+
+    theme = st.session_state.theme
+
+    # Define Theme Palettes
+    if theme == 'dark':
+        css_vars = """
+        :root {
+            --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --card-border: rgba(255, 255, 255, 0.1);
+            --shadow-color: rgba(0, 0, 0, 0.3);
+            --accent-primary: #06b6d4;
+            --accent-secondary: #8b5cf6;
+            --button-bg: #0f172a;
+            --button-text: #ffffff;
+            --button-border: rgba(255, 255, 255, 0.2);
+            --sidebar-bg: #0f172a;
+            --sidebar-border: rgba(255, 255, 255, 0.1);
+            --glass-blur: blur(12px);
+            --pill-bg: rgba(30, 41, 59, 0.7);
+            --pill-text: #f8fafc;
+            --pill-active-bg: #06b6d4;
+        }
+        """
+    else: # Light Theme
+        css_vars = """
+        :root {
+            --bg-gradient: linear-gradient(135deg, #fdfbf7 0%, #f4f7f6 100%);
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --card-bg: #ffffff;
+            --card-border: rgba(0, 0, 0, 0.05);
+            --shadow-color: rgba(0, 0, 0, 0.05);
+            --accent-primary: #06b6d4;
+            --accent-secondary: #3b82f6;
+            --button-bg: #0f172a;
+            --button-text: #ffffff;
+            --button-border: transparent;
+            --sidebar-bg: #ffffff;
+            --sidebar-border: #f1f5f9;
+            --glass-blur: none;
+            --pill-bg: #ffffff;
+            --pill-text: #1e293b;
+            --pill-active-bg: #06b6d4;
+        }
+        """
+
+    st.markdown(f"""
     <style>
         /* Import modern font */
         @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap');
 
-        /* Safer Global Selectors */
-        html, body {
-            font-family: 'Outfit', sans-serif;
-            color: #333;
-        }
+        /* Inject Theme Variables */
+        {css_vars}
 
-        /* Global Background - Warm Neutral Light Theme */
-        .stApp {
-            background: linear-gradient(135deg, #fdfbf7 0%, #f4f7f6 100%);
-            background-attachment: fixed;
-            color: #333;
-        }
+        /* Safer Global Selectors */
+        html, body {{
+            font-family: 'Outfit', sans-serif;
+            color: var(--text-primary);
+        }}
+
+        /* Global Background */
+        .stApp {{
+            background: var(--bg-gradient) !important;
+            background-attachment: fixed !important;
+            color: var(--text-primary) !important;
+        }}
+
+        /* Transparent Header */
+        header[data-testid="stHeader"] {{
+            background: transparent !important;
+        }}
         
         /* Force text color for Streamlit elements */
-        .stMarkdown, .stText, p, div, label, li, span {
-            color: #333 !important;
-        }
+        .stMarkdown, .stText, p, div, label, li, span, h1, h2, h3, h4, h5, h6 {{
+            color: var(--text-primary) !important;
+        }}
         
-        h1, h2, h3, h4, h5, h6 {
-            color: #1a1a1a !important;
+        /* Headings specific overrides if needed */
+        h1, h2, h3, h4, h5, h6 {{
             font-weight: 700;
             letter-spacing: -0.5px;
-            text-shadow: none;
-        }
+        }}
 
-        /* Card Container - Clean White */
-        .card-container {
-            background-color: #ffffff;
+        /* Card Container */
+        .card-container {{
+            background-color: var(--card-bg) !important;
             border-radius: 16px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+            box-shadow: 0 4px 20px var(--shadow-color);
             padding: 24px;
             margin-bottom: 20px;
-            border: 1px solid rgba(0,0,0,0.05);
+            border: 1px solid var(--card-border) !important;
+            backdrop-filter: var(--glass-blur);
             transition: transform 0.2s ease, box-shadow 0.2s ease;
-        }
+        }}
 
-        .card-container:hover {
+        .card-container:hover {{
             transform: translateY(-4px);
-            box-shadow: 0 12px 30px rgba(0,0,0,0.1);
-        }
-
-        /* Typography */
-        .bank-name {
-            font-size: 0.8rem;
-            color: #64748b;
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-            font-weight: 600;
-            margin-bottom: 6px;
-        }
-
-        .card-title {
-            font-size: 1.4rem;
-            font-weight: 700;
-            color: #1e293b;
-            margin-bottom: 15px;
-            background: none;
-            -webkit-text-fill-color: initial;
-        }
-
-        /* Stats Grid */
-        .stats-grid {
-            display: flex;
-            gap: 25px;
+            box-shadow: 0 12px 30px var(--shadow-color);
+        }}
+        
+        /* Graph Container (reusing card styles) */
+        .graph-container {{
+            background: var(--card-bg);
+            backdrop-filter: var(--glass-blur);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            padding: 20px;
             margin-bottom: 20px;
-            padding-bottom: 20px;
-            border-bottom: 1px solid #f1f5f9;
-        }
+            box-shadow: 0 8px 32px 0 var(--shadow-color);
+        }}
 
-        .stat-item {
+        /* Mini Card */
+        .mini-card {{
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            padding: 15px;
+            text-align: center;
+            margin-bottom: 15px;
+            transition: transform 0.2s ease, background 0.2s ease;
+            height: 100%;
             display: flex;
             flex-direction: column;
-        }
-
-        .stat-label {
-            font-size: 0.7rem;
-            color: #94a3b8;
-            text-transform: uppercase;
-            font-weight: 600;
-            margin-bottom: 4px;
-        }
-
-        .stat-value {
-            font-size: 1.1rem;
-            font-weight: 600;
-            color: #333;
-            text-shadow: none;
-        }
-
-        /* Benefits List */
-        .benefit-item {
-            font-size: 0.9rem;
-            color: #475569;
-            margin-bottom: 8px;
-            display: flex;
             align-items: center;
-        }
-        
-        .benefit-icon {
-            margin-right: 10px;
-            color: #06b6d4; /* Keep Cyan Accent */
-            text-shadow: none;
-        }
-
-        /* Buttons */
-        /* Buttons */
-        .stButton>button {
-            background: #0f172a; /* Dark Button for Contrast */
-            color: white !important;
-            border-radius: 8px;
-            border: none;
-            padding: 0.6rem 1.2rem;
-            font-weight: 600;
-            transition: all 0.3s;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-        }
-        
-        /* Force child elements in buttons to be white */
-        .stButton>button p, .stButton>button div, .stButton>button span {
-            color: white !important;
-        }
-
-        /* Specific fix for Buttons inside Dialogs/Modals */
-        div[data-testid="stDialog"] .stButton > button,
-        div[role="dialog"] .stButton > button {
-            background: #0f172a !important;
-            color: white !important;
-            border: 1px solid rgba(255,255,255,0.1);
-        }
-
-        /* FORCE Primary Buttons to have white text everywhere */
-        button[kind="primary"], 
-        button[kind="primary"] p, 
-        button[kind="primary"] div, 
-        button[kind="primary"] span {
-            color: #ffffff !important;
-        }
-        
-        .stButton>button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 15px rgba(0,0,0,0.15);
-            background: #1e293b;
-        }
-        
-        /* Sidebar - Light Theme */
-        [data-testid="stSidebar"] {
-            background-color: #ffffff !important;
-            border-right: 1px solid #f1f5f9;
-        }
-        
-        [data-testid="stSidebar"] * {
-            color: #333 !important;
-        }
-        
-        /* Reset Pills to Default (Streamlit handles light mode well) */
-        div[data-testid="stPills"] span {
-            color: inherit !important;
-            font-weight: normal;
-        }
-
-        /* Force Dialog/Modal background to be Dark (User Preference) */
-        div[data-testid="stDialog"], div[role="dialog"] {
-            background-color: #1e293b !important;
-            color: #f8fafc !important;
-            border: 1px solid rgba(255,255,255,0.1);
-        }
-        div[data-testid="stDialog"] > div, div[role="dialog"] > div {
-             background-color: #1e293b !important;
-             color: #f8fafc !important;
-        }
-        div[data-testid="stDialog"] p, div[role="dialog"] p,
-        div[data-testid="stDialog"] div, div[role="dialog"] div,
-        div[data-testid="stDialog"] span, div[role="dialog"] span,
-        div[data-testid="stDialog"] h1, div[data-testid="stDialog"] h2, 
-        div[data-testid="stDialog"] h3, div[data-testid="stDialog"] h4 {
-            color: #f8fafc !important;
-            background-color: transparent !important;
-        }
-
-        /* Secondary Button Style */
-        .btn-secondary {
-            background: rgba(255, 255, 255, 0.05);
-            color: #e2e8f0;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        /* Custom Links as Buttons */
-        .apply-btn {
-            display: inline-block;
-            background: linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%);
-            color: white !important;
-            padding: 12px 24px;
-            border-radius: 8px;
-            text-decoration: none;
-            font-weight: 600;
-            text-align: center;
-            width: 100%;
-            margin-bottom: 10px;
-            transition: all 0.3s;
-            box-shadow: 0 4px 15px rgba(6, 182, 212, 0.3);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .apply-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(6, 182, 212, 0.5);
-            filter: brightness(1.1);
-        }
-
-        .details-btn {
-            display: inline-block;
-            background: rgba(255, 255, 255, 0.03);
-            color: #06b6d4 !important;
-            padding: 10px 24px;
-            border-radius: 8px;
-            text-decoration: none;
-            font-weight: 600;
-            text-align: center;
-            width: 100%;
-            border: 1px solid rgba(6, 182, 212, 0.3);
-            transition: all 0.3s;
-        }
-
-        .details-btn:hover {
-            background: rgba(6, 182, 212, 0.1);
-            color: #22d3ee !important;
-            border-color: #22d3ee;
-            box-shadow: 0 0 15px rgba(6, 182, 212, 0.2);
-        }
-
-        /* Chat Bubbles */
-        .user-bubble {
-            background: linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%);
-            color: white;
-            border-radius: 18px 18px 0 18px;
-            padding: 14px 20px;
-            margin: 10px 0;
-            text-align: right;
-            display: inline-block;
-            float: right;
-            clear: both;
-            box-shadow: 0 4px 15px rgba(6, 182, 212, 0.2);
-        }
-        
-        .ai-bubble {
-            background: #f1f5f9; /* Light Grey */
-            color: #333333; /* Dark Text */
-            border: 1px solid #e2e8f0;
-            border-radius: 18px 18px 18px 0;
-            padding: 14px 20px;
-            margin: 10px 0;
-            display: inline-block;
-            float: left;
-            clear: both;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-        }
-        
-        /* Glass Card */
-        .glass-card {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border-radius: 16px;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
-            margin-bottom: 20px;
-            overflow: hidden;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-        
-        .glass-card:hover {
+            justify-content: center;
+            box-shadow: 0 4px 10px var(--shadow-color);
+        }}
+        .mini-card:hover {{
             transform: translateY(-5px);
-            box-shadow: 0 12px 40px 0 rgba(31, 38, 135, 0.15);
-        }
-        
-        .card-content {
-            display: flex;
-            flex-direction: row;
-            padding: 20px;
-            gap: 25px;
-        }
-        
-        .card-image-container {
-            flex: 0 0 180px; /* Wider for landscape */
+            box-shadow: 0 10px 20px var(--shadow-color);
+        }}
+        .mini-card-img-container {{
+            height: 100px;
+            width: 100%;
             display: flex;
             align-items: center;
             justify-content: center;
-            background: #f8f9fa;
-            border-radius: 12px;
-            padding: 10px;
-            height: 120px; /* Fixed height to force landscape box */
-        }
-        
-        .card-img {
+            margin-bottom: 10px;
+        }}
+        .mini-card img {{
             max-width: 100%;
             max-height: 100%;
             object-fit: contain;
             filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));
-        }
+        }}
+        .mini-card h4 {{
+            font-size: 0.9rem;
+            color: var(--text-primary) !important;
+            margin: 0;
+            font-weight: 600;
+            line-height: 1.3;
+        }}
+        .mini-card p {{
+            font-size: 0.75rem;
+            color: var(--text-secondary) !important;
+            margin: 5px 0 0 0;
+        }}
+
+        /* Typography Helpers */
+        .bank-name {{
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }}
+
+        .card-title {{
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 15px;
+            background: none;
+        }}
+
+        /* Stats Grid */
+        .stats-grid {{
+            display: flex;
+            gap: 25px;
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--card-border);
+        }}
+
+        .stat-item {{
+            display: flex;
+            flex-direction: column;
+        }}
+
+        .stat-label {{
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }}
+
+        .stat-value {{
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }}
+
+        /* Benefits List */
+        .benefit-item {{
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+        }}
         
-        .card-details {
+        .benefit-icon {{
+            margin-right: 10px;
+            color: var(--accent-primary);
+            text-shadow: none;
+        }}
+
+        /* Buttons */
+        .stButton>button {{
+            background: var(--button-bg) !important;
+            color: var(--button-text) !important;
+            border-radius: 8px;
+            border: 1px solid var(--button-border);
+            padding: 0.6rem 1.2rem;
+            font-weight: 600;
+            transition: all 0.3s;
+            box-shadow: 0 4px 10px var(--shadow-color);
+        }}
+        
+        .stButton>button p, .stButton>button div, .stButton>button span {{
+            color: var(--button-text) !important;
+        }}
+        
+        .stButton>button:hover {{
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px var(--shadow-color);
+            filter: brightness(1.1);
+        }}
+
+        /* Sidebar */
+        [data-testid="stSidebar"] {{
+            background-color: var(--sidebar-bg) !important;
+            border-right: 1px solid var(--sidebar-border);
+        }}
+        
+        [data-testid="stSidebar"] * {{
+            color: var(--text-primary) !important;
+        }}
+        
+        /* Pills (Filter Chips) */
+        [data-testid="stPills"] {{
+            background: transparent !important;
+        }}
+        
+        /* Target the individual pill options */
+        [data-testid="stPills"] [role="option"] {{
+            background-color: var(--pill-bg) !important;
+            border: 1px solid var(--card-border) !important;
+            color: var(--pill-text) !important;
+            transition: all 0.2s;
+        }}
+        
+        [data-testid="stPills"] [role="option"]:hover {{
+            border-color: var(--accent-primary) !important;
+            color: var(--accent-primary) !important;
+        }}
+        
+        /* Active Pill */
+        [data-testid="stPills"] [role="option"][aria-selected="true"] {{
+            background-color: var(--pill-active-bg) !important;
+            color: #ffffff !important;
+            border-color: var(--pill-active-bg) !important;
+        }}
+        
+        /* Fallback for button selector if role="option" fails */
+        [data-testid="stPills"] button {{
+            background-color: var(--pill-bg) !important;
+            border: 1px solid var(--card-border) !important;
+            color: var(--pill-text) !important;
+        }}
+
+        /* Dialog/Modal */
+        div[data-testid="stDialog"], div[role="dialog"] {{
+            background-color: var(--card-bg) !important;
+            color: var(--text-primary) !important;
+            border: 1px solid var(--card-border);
+            backdrop-filter: blur(20px);
+        }}
+        div[data-testid="stDialog"] > div, div[role="dialog"] > div {{
+             background-color: transparent !important;
+             color: var(--text-primary) !important;
+        }}
+        
+        /* Glass Card (used in lists) */
+        .glass-card {{
+            background: var(--card-bg);
+            backdrop-filter: var(--glass-blur);
+            border-radius: 16px;
+            border: 1px solid var(--card-border);
+            box-shadow: 0 8px 32px 0 var(--shadow-color);
+            margin-bottom: 20px;
+            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }}
+        
+        .glass-card:hover {{
+            transform: translateY(-5px);
+            box-shadow: 0 12px 40px 0 var(--shadow-color);
+        }}
+        
+        .card-content {{
+            display: flex;
+            flex-direction: row;
+            padding: 20px;
+            gap: 25px;
+        }}
+        
+        .card-image-container {{
+            flex: 0 0 180px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255,255,255,0.05);
+            border-radius: 12px;
+            padding: 10px;
+            height: 120px;
+        }}
+        
+        .card-img {{
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));
+        }}
+        
+        .card-details {{
             flex: 1;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-        }
+        }}
         
-        .card-header {
+        .card-header {{
             margin-bottom: 10px;
-        }
+        }}
         
-        .card-title {
-            font-size: 1.4rem;
-            font-weight: 700;
-            color: #1a1a1a;
-            margin: 0 0 5px 0;
-        }
-        
-        .card-bank {
+        .card-bank {{
             font-size: 0.9rem;
-            color: #6c757d;
+            color: var(--text-secondary);
             text-transform: uppercase;
             letter-spacing: 1px;
             font-weight: 600;
             margin: 0;
-        }
+        }}
         
-        .card-stats {
+        .card-stats {{
             display: flex;
             gap: 30px;
             margin-bottom: 15px;
             padding-bottom: 15px;
-            border-bottom: 1px solid #eee;
-        }
+            border-bottom: 1px solid var(--card-border);
+        }}
         
-        .stat-item {
-            display: flex;
-            flex-direction: column;
-        }
-        
-        .stat-label {
-            font-size: 0.75rem;
-            color: #adb5bd;
-            text-transform: uppercase;
-            font-weight: 600;
-            margin-bottom: 4px;
-        }
-        
-        .stat-value {
-            font-size: 1rem;
-            font-weight: 600;
-            color: #212529;
-        }
-        
-        .card-benefits {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-        
-        .benefit-tag {
-            background: #e7f5ff;
-            color: #0056b3;
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 0.85rem;
-            font-weight: 500;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        /* Mobile Optimization - Compact View */
-        @media (max-width: 768px) {
-            .card-container {
+        /* Mobile Optimization */
+        @media (max-width: 768px) {{
+            .card-content {{
+                flex-direction: row !important;
                 padding: 10px !important;
-                margin-bottom: 10px !important;
-            }
-            
-            .card-content {
-                flex-direction: row !important; /* Keep horizontal */
-                padding: 0 !important;
                 gap: 10px !important;
-                align-items: center !important;
-            }
-            
-            .card-image-container {
-                flex: 0 0 80px !important; /* Fixed small width */
+            }}
+            .card-image-container {{
+                flex: 0 0 80px !important;
                 height: 50px !important;
-                min-height: 0 !important;
-                padding: 2px !important;
-                margin: 0 !important;
-            }
-            
-            .card-img {
-                max-height: 100% !important;
-            }
-            
-            .card-details {
-                text-align: left !important;
-                align-items: flex-start !important;
-                gap: 2px !important;
-            }
-            
-            .card-header {
-                margin-bottom: 2px !important;
-            }
-            
-            .card-title {
-                font-size: 0.95rem !important;
-                margin-bottom: 0 !important;
-                line-height: 1.2 !important;
-            }
-            
-            .card-bank {
-                font-size: 0.7rem !important;
-                display: none; /* Hide bank name to save space if title has it */
-            }
-            
-            .card-stats {
-                border: none !important;
-                margin: 0 !important;
-                padding: 0 !important;
-                gap: 10px !important;
-                justify-content: flex-start !important;
-            }
-            
-            .stat-item {
-                flex-direction: column !important;
-                gap: 0px !important;
-                align-items: flex-start !important;
-                margin-right: 0px !important;
-                flex: 1 1 0px !important; /* Equal width columns */
-                min-width: 0 !important; /* Allow text wrap */
-                word-wrap: break-word !important;
-            }
-            
-            .stat-label {
-                font-size: 0.6rem !important;
-                display: block !important; /* Show labels */
-                line-height: 1 !important;
-                margin-bottom: 2px !important;
-            }
-            
-            .stat-value {
-                font-size: 0.75rem !important;
-                font-weight: 600 !important;
-                line-height: 1.1 !important;
-            }
-            
-            /* Remove icons */
-            .stat-value::before {
-                content: none !important; 
-            }
-            
-            /* Hide benefits on mobile list view */
-            .card-benefits {
+            }}
+            .card-benefits {{
                 display: none !important;
-            }
-            
-            /* Show mobile actions */
-            .mobile-actions {
-                display: block !important;
-                margin-top: 5px;
-            }
-        }
+            }}
+        }}
 
         /* --- GLASS SHEET MODAL (CSS ONLY) --- */
-        .modal-overlay {
+        .modal-overlay {{
             position: fixed;
             top: 0;
             left: 0;
@@ -485,20 +403,19 @@ def load_css():
             backdrop-filter: blur(4px);
             z-index: 9999;
             opacity: 0;
-            visibility: hidden;
-            transition: opacity 0.3s ease, visibility 0.3s ease;
-            display: flex;
+            display: none; /* Changed from visibility: hidden to display: none */
+            transition: opacity 0.3s ease;
             align-items: center;
             justify-content: center;
-        }
+        }}
 
         /* Show modal when target is active */
-        .modal-overlay:target {
+        .modal-overlay:target {{
             opacity: 1;
-            visibility: visible;
-        }
+            display: flex; /* Show when targeted */
+        }}
 
-        .modal-content {
+        .modal-content {{
             background: rgba(30, 41, 59, 0.95); /* Dark Slate */
             backdrop-filter: blur(15px);
             border-radius: 20px;
@@ -513,13 +430,13 @@ def load_css():
             transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
             display: flex;
             flex-direction: column;
-        }
+        }}
 
-        .modal-overlay:target .modal-content {
+        .modal-overlay:target .modal-content {{
             transform: scale(1);
-        }
+        }}
 
-        .modal-close {
+        .modal-close {{
             position: absolute;
             top: 15px;
             right: 15px;
@@ -536,84 +453,84 @@ def load_css():
             font-size: 1.2rem;
             z-index: 10;
             transition: background 0.2s;
-        }
+        }}
         
-        .modal-close:hover {
+        .modal-close:hover {{
             background: rgba(0, 0, 0, 0.1);
-        }
+        }}
 
-        .modal-header {
+        .modal-header {{
             padding: 25px 25px 15px 25px;
             border-bottom: 1px solid rgba(0,0,0,0.05);
             text-align: center;
-        }
+        }}
         
-        .modal-img-container {
+        .modal-img-container {{
             height: 140px;
             display: flex;
             align-items: center;
             justify-content: center;
             margin-bottom: 15px;
-        }
+        }}
         
-        .modal-img {
+        .modal-img {{
             max-height: 100%;
             max-width: 100%;
             object-fit: contain;
             filter: drop-shadow(0 8px 16px rgba(0,0,0,0.15));
-        }
+        }}
 
-        .modal-title {
+        .modal-title {{
             font-size: 1.5rem;
             font-weight: 800;
             color: #f8fafc !important;
             margin: 0;
             line-height: 1.2;
-        }
+        }}
         
-        .modal-bank {
+        .modal-bank {{
             font-size: 0.9rem;
             color: #cbd5e1 !important;
             text-transform: uppercase;
             letter-spacing: 1px;
             margin-top: 5px;
-        }
+        }}
 
-        .modal-body {
+        .modal-body {{
             padding: 25px;
             flex: 1;
-        }
+        }}
 
-        .modal-grid {
+        .modal-grid {{
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 15px;
             margin-bottom: 25px;
-        }
+        }}
         
-        .modal-stat-box {
+        .modal-stat-box {{
             background: rgba(255,255,255,0.05);
             border: 1px solid rgba(255,255,255,0.1);
             border-radius: 12px;
             padding: 12px;
             text-align: center;
-        }
+        }}
         
-        .modal-stat-label {
+        .modal-stat-label {{
             font-size: 0.7rem;
             color: #94a3b8 !important;
             text-transform: uppercase;
             display: block;
             margin-bottom: 4px;
-        }
+        }}
         
-        .modal-stat-value {
+        .modal-stat-value {{
             font-size: 0.95rem;
             font-weight: 700;
             color: #f8fafc !important;
-        }
+        }}
 
-        .modal-section-title {
+        .modal-section-title {{
             font-size: 1rem;
             font-weight: 700;
             margin: 20px 0 10px 0;
@@ -621,68 +538,64 @@ def load_css():
             display: flex;
             align-items: center;
             gap: 8px;
-        }
+        }}
 
-        .modal-benefits-list {
+        .modal-benefits-list {{
             list-style: none;
             padding: 0;
             margin: 0;
-        }
+        }}
         
-        .modal-benefit-item {
+        .modal-benefit-item {{
             padding: 8px 0;
             border-bottom: 1px solid rgba(255,255,255,0.1);
             font-size: 0.95rem;
             color: #cbd5e1 !important;
             display: flex;
             gap: 10px;
-        }
+        }}
         
-        .modal-benefit-item:last-child {
+        .modal-benefit-item:last-child {{
             border-bottom: none;
-        }
+        }}
 
-        .modal-footer {
+        .modal-footer {{
             padding: 20px;
             background: rgba(30, 41, 59, 0.9);
             border-top: 1px solid rgba(255,255,255,0.1);
             position: sticky;
             bottom: 0;
             backdrop-filter: blur(10px);
-        }
+        }}
 
-        .modal-text-content {
+        .modal-text-content {{
             font-size: 0.95rem;
             color: #cbd5e1 !important;
             margin-bottom: 15px;
-        }
+        }}
 
         /* Mobile Bottom Sheet Animation */
-        @media (max-width: 768px) {
-            .modal-overlay {
+        @media (max-width: 768px) {{
+            .modal-overlay {{
                 align-items: flex-end; /* Align to bottom */
-            }
+            }}
             
-            .modal-content {
+            .modal-content {{
                 width: 100%;
                 max-width: 100%;
                 border-radius: 24px 24px 0 0; /* Rounded top only */
                 max-height: 85vh;
                 transform: translateY(100%); /* Start off-screen */
                 transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-            }
+            }}
             
-            .modal-overlay:target .modal-content {
+            .modal-overlay:target .modal-content {{
                 transform: translateY(0); /* Slide up */
-            }
-        }
+            }}
+        }}
 
     </style>
     """, unsafe_allow_html=True)
-
-import base64
-import json
-import re
 
 def parse_salary(salary_str):
     """
@@ -711,17 +624,25 @@ def get_image_base64(file_path):
         # print(f"Error loading image {file_path}: {e}")
         return "https://via.placeholder.com/300x180?text=Error+Loading+Image"
 
+import sqlite3
+
 @st.cache_data(ttl=3600)
-def load_card_mapping():
-    """Loads the card image mapping from JSON."""
-    mapping_file = os.path.join(os.path.dirname(__file__), 'card_image_mapping.json')
-    if os.path.exists(mapping_file):
-        try:
-            with open(mapping_file, 'r') as f:
-                return json.load(f)
-        except:
-            pass
-    return {}
+def get_card_image_from_db(card_id):
+    """
+    Fetches image filename from the database (Cached).
+    Returns None if not found.
+    """
+    db_path = os.path.join(os.path.dirname(__file__), '..', 'credit_card_data.db')
+    try:
+        conn = sqlite3.connect(db_path)
+        cursor = conn.cursor()
+        cursor.execute("SELECT local_filename FROM card_images WHERE card_id = ?", (card_id,))
+        result = cursor.fetchone()
+        conn.close()
+        return result[0] if result else None
+    except Exception as e:
+        # print(f"DB Error: {e}")
+        return None
 
 @st.cache_data(ttl=3600)
 def get_image_base64_cached(file_path):
@@ -732,15 +653,10 @@ def get_card_image_source(row):
     """
     Finds the image and returns a Base64 string source for HTML.
     """
-    # Load mapping (Cached)
-    card_mapping = load_card_mapping()
-
     card_id = str(row['id'])
-    filename = None
     
-    # 1. Try Mapping
-    if card_id in card_mapping and card_mapping[card_id]:
-        filename = card_mapping[card_id]
+    # 1. Try Database
+    filename = get_card_image_from_db(card_id)
         
     # Handle Generic
     if filename == "Generic Card":

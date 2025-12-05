@@ -20,14 +20,45 @@ from selenium.webdriver.support import expected_conditions as EC
 
 # --- CONFIGURATION SECTION ---
 from dotenv import load_dotenv
+import toml
+
 load_dotenv(override=True)
 
 chromedriver_path = 'C:/Users/cdf846/Documents/personal/Credit card project/chromedriver.exe'
 db_file = 'credit_card_data.db'
-LLM_API_KEY = os.getenv("GEMINI_API_KEY")
+
+# Try loading from secrets.toml first
+secrets_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'streamlit_app', '.streamlit', 'secrets.toml'))
+print(f"DEBUG: Looking for secrets at: {secrets_path}")
+LLM_API_KEY = None
+
+if os.path.exists(secrets_path):
+    try:
+        data = toml.load(secrets_path)
+        if "gemini" in data and "api_key" in data["gemini"]:
+            LLM_API_KEY = data["gemini"]["api_key"]
+            print("DEBUG: Found api_key in [gemini] section of secrets.toml")
+        elif "GEMINI_API_KEY" in data:
+            LLM_API_KEY = data["GEMINI_API_KEY"]
+        elif "connections" in data and "gemini" in data["connections"]:
+             LLM_API_KEY = data["connections"]["gemini"].get("api_key")
+        elif "openai" in data and "GEMINI_API_KEY" in data["openai"]:
+             LLM_API_KEY = data["openai"]["GEMINI_API_KEY"]
+    except Exception as e:
+        print(f"Error loading secrets.toml: {e}")
+else:
+    print("DEBUG: secrets.toml not found at path.")
+
+# Fallback to environment variable
+if not LLM_API_KEY:
+    LLM_API_KEY = os.getenv("GEMINI_API_KEY")
+    if LLM_API_KEY:
+        print("DEBUG: Found GEMINI_API_KEY in environment variables")
 
 if not LLM_API_KEY:
-    print("WARNING: GEMINI_API_KEY not found in environment variables.")
+    print("WARNING: GEMINI_API_KEY not found in secrets.toml or environment variables.")
+else:
+    print(f"DEBUG: API Key loaded (Length: {len(LLM_API_KEY)})")
 
 genai.configure(api_key=LLM_API_KEY)
 
@@ -333,7 +364,6 @@ def update_card_in_database(database_file, result, card_info):
                 rates = re.findall(r'(\d+(?:\.\d+)?)%', str(raw_cashback))
                 if rates:
                     max_cashback_rate = max([float(r) for r in rates])
-                
                 # Uncapped
                 if 'unlimited' in text_lower or 'no cap' in text_lower:
                     is_uncapped = True
@@ -347,7 +377,7 @@ def update_card_in_database(database_file, result, card_info):
             pass
 
         insert_sql = """
-        INSERT OR REPLACE INTO credit_cards_details (
+        INSERT INTO credit_cards_details (
             url, bank_name, card_name, minimum_salary_requirement, min_salary_numeric, annual_fee,
             minimum_spend_requirement, balance_transfer_eligibility, welcome_bonus,
             cashback_rates, max_cashback_rate, is_uncapped, cashback_type,
@@ -355,8 +385,36 @@ def update_card_in_database(database_file, result, card_info):
             travel_insurance, airport_transfers, hotel_discounts, cinema_offers,
             dining_discounts, golf_privileges, valet_parking, purchase_protection,
             extended_warranty, other_key_benefits, last_updated
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ON CONFLICT(url) DO UPDATE SET
+            bank_name=excluded.bank_name,
+            card_name=excluded.card_name,
+            minimum_salary_requirement=excluded.minimum_salary_requirement,
+            min_salary_numeric=excluded.min_salary_numeric,
+            annual_fee=excluded.annual_fee,
+            minimum_spend_requirement=excluded.minimum_spend_requirement,
+            balance_transfer_eligibility=excluded.balance_transfer_eligibility,
+            welcome_bonus=excluded.welcome_bonus,
+            cashback_rates=excluded.cashback_rates,
+            max_cashback_rate=excluded.max_cashback_rate,
+            is_uncapped=excluded.is_uncapped,
+            cashback_type=excluded.cashback_type,
+            points_earning_rates=excluded.points_earning_rates,
+            cobrand_rewards=excluded.cobrand_rewards,
+            airport_lounge_access=excluded.airport_lounge_access,
+            travel_insurance=excluded.travel_insurance,
+            airport_transfers=excluded.airport_transfers,
+            hotel_discounts=excluded.hotel_discounts,
+            cinema_offers=excluded.cinema_offers,
+            dining_discounts=excluded.dining_discounts,
+            golf_privileges=excluded.golf_privileges,
+            valet_parking=excluded.valet_parking,
+            purchase_protection=excluded.purchase_protection,
+            extended_warranty=excluded.extended_warranty,
+            other_key_benefits=excluded.other_key_benefits,
+            last_updated=excluded.last_updated;
         """
+
         cursor.execute(insert_sql, (
             target_url, bank_name, card_name,
             data_to_insert.get('Minimum Salary Requirement', '-'),

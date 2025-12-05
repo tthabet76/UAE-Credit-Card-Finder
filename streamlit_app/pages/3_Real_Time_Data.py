@@ -16,72 +16,7 @@ st.set_page_config(
 load_css()
 
 # Additional CSS for this page to match Home
-st.markdown("""
-<style>
-    /* Page Background */
-    .stApp {
-        background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%) !important;
-        background-attachment: fixed !important;
-    }
-    
-    /* Text Colors */
-    h1, h2, h3, h4, .stMarkdown, p, span, div {
-        color: #e2e8f0 !important;
-    }
-    
-    /* Plotly Chart Backgrounds */
-    .js-plotly-plot .plotly .main-svg {
-        background: rgba(0,0,0,0) !important;
-    }
-    
-    /* Mini Card for Real-time Data Page */
-    .mini-card {
-        background: rgba(255, 255, 255, 0.05);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: 12px;
-        padding: 15px;
-        text-align: center;
-        margin-bottom: 15px;
-        transition: transform 0.2s ease, background 0.2s ease;
-        height: 100%;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-    }
-    .mini-card:hover {
-        transform: translateY(-5px);
-        background: rgba(255, 255, 255, 0.1);
-        box-shadow: 0 10px 20px rgba(0,0,0,0.2);
-    }
-    .mini-card-img-container {
-        height: 100px;
-        width: 100%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin-bottom: 10px;
-    }
-    .mini-card img {
-        max-width: 100%;
-        max-height: 100%;
-        object-fit: contain;
-        filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3));
-    }
-    .mini-card h4 {
-        font-size: 0.9rem;
-        color: #e2e8f0 !important;
-        margin: 0;
-        font-weight: 600;
-        line-height: 1.3;
-    }
-    .mini-card p {
-        font-size: 0.75rem;
-        color: #94a3b8 !important;
-        margin: 5px 0 0 0;
-    }
-</style>
-""", unsafe_allow_html=True)
+# CSS handled by utils.load_css
 
 # --- HELPER FUNCTIONS ---
 def get_mini_card_html(row):
