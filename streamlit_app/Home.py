@@ -219,6 +219,33 @@ with col2:
 
 st.markdown("---")
 
+# --- MOBILE CSS FOR FEATURE BOXES ---
+st.markdown("""
+<style>
+    /* This media query targets only small screens (like phones) */
+    @media only screen and (max-width: 600px) {
+        /* Target the container of each feature box */
+        .card-container {
+            /* Reduce internal padding */
+            padding: 1.5rem !important;
+            /* Reduce space below each box */
+            margin-bottom: 1rem !important;
+        }
+
+        /* Make the icons (🔍, 🤖, 📊) slightly smaller */
+        .card-container div[style*="font-size: 2.5rem"] {
+            font-size: 2rem !important;
+        }
+
+        /* Make the headings ("Smart Comparison") slightly smaller */
+        .card-container h3 {
+            font-size: 1.3rem !important;
+            margin: 0.5rem 0 !important;
+        }
+    }
+</style>
+""", unsafe_allow_html=True)
+
 # --- FEATURES SECTION (Adapted from original Home.py) ---
 col1, col2, col3 = st.columns(3)
 
