@@ -9,6 +9,11 @@ import datetime
 
 st.set_page_config(layout="wide", page_title="Image Mapper Tool")
 
+# --- ENVIRONMENT CHECK ---
+if not st.secrets.get("is_local", False):
+    st.warning("⚠️ This tool is only available in the local environment.")
+    st.stop()
+
 # Paths
 DB_FILE = os.path.join(os.path.dirname(__file__), '..', '..', 'credit_card_data.db')
 IMAGE_DIR = os.path.join(os.path.dirname(__file__), '..', 'static', 'cards')
