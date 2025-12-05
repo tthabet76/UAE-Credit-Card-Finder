@@ -223,24 +223,52 @@ st.markdown("---")
 st.markdown("""
 <style>
     /* This media query targets only small screens (like phones) */
-    @media only screen and (max-width: 600px) {
+    @media only screen and (max-width: 768px) {
         /* Target the container of each feature box */
         .card-container {
+            /* Use Grid Layout for Horizontal Alignment */
+            display: grid !important;
+            grid-template-columns: auto 1fr; /* Icon takes auto width, text takes rest */
+            grid-template-rows: auto auto; /* Two rows for Title and Description */
+            column-gap: 1rem; /* Space between Icon and Text */
+            
             /* Reduce internal padding */
-            padding: 1.5rem !important;
+            padding: 1rem !important;
             /* Reduce space below each box */
-            margin-bottom: 1rem !important;
+            margin-bottom: 0.8rem !important;
+            /* Align text to left */
+            text-align: left !important;
+            align-items: center;
         }
 
-        /* Make the icons (🔍, 🤖, 📊) slightly smaller */
-        .card-container div[style*="font-size: 2.5rem"] {
-            font-size: 2rem !important;
+        /* Target the Icon Div (First Child) */
+        .card-container > div:first-child {
+            grid-column: 1;
+            grid-row: 1 / 3; /* Span both rows */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.2rem !important; /* Adjust icon size */
+            margin-bottom: 0 !important; /* Remove bottom margin */
         }
 
-        /* Make the headings ("Smart Comparison") slightly smaller */
+        /* Target the Title (H3) */
         .card-container h3 {
-            font-size: 1.3rem !important;
-            margin: 0.5rem 0 !important;
+            grid-column: 2;
+            grid-row: 1;
+            font-size: 1.1rem !important;
+            margin: 0 !important;
+            align-self: end; /* Align to bottom of its cell */
+        }
+
+        /* Target the Description (P) */
+        .card-container p {
+            grid-column: 2;
+            grid-row: 2;
+            font-size: 0.85rem !important;
+            margin: 0 !important;
+            align-self: start; /* Align to top of its cell */
+            line-height: 1.3;
         }
     }
 </style>
