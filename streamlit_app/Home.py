@@ -219,10 +219,30 @@ with col2:
 
 st.markdown("---")
 
-# --- MOBILE CSS FOR FEATURE BOXES ---
+# --- FEATURE BOX STYLING (Tap Cues & Mobile Layout) ---
 st.markdown("""
 <style>
-    /* This media query targets only small screens (like phones) */
+    /* 1. Base Style for Animations & Tap Cues (Overrides utils.py for Home) */
+    .card-container {
+        position: relative; /* Needed to position the arrow */
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        /* Add extra padding on the right for the arrow icon */
+        padding-right: 40px !important;
+    }
+
+    /* Add the chevron arrow using CSS pseudo-element */
+    .card-container::after {
+        content: '›'; /* A nice chevron character */
+        position: absolute;
+        right: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 2rem;
+        color: var(--accent-primary); /* Make it neon cyan */
+        font-weight: 300;
+    }
+
+    /* 2. Mobile Layout Adjustments */
     @media only screen and (max-width: 768px) {
         /* Target the container of each feature box */
         .card-container {
@@ -232,8 +252,9 @@ st.markdown("""
             grid-template-rows: auto auto; /* Two rows for Title and Description */
             column-gap: 1rem; /* Space between Icon and Text */
             
-            /* Reduce internal padding */
-            padding: 1rem !important;
+            /* Reduce internal padding, BUT keep right padding for arrow */
+            padding: 1rem 40px 1rem 1rem !important;
+            
             /* Reduce space below each box */
             margin-bottom: 0.8rem !important;
             /* Align text to left */
