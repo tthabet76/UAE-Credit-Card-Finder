@@ -50,7 +50,7 @@ st.markdown(
     .ticker {{
         display: inline-block;
         /* The animation: name, duration, curve, loop */
-        animation: ticker-scroll 35s linear infinite;
+        animation: ticker-scroll 70s linear infinite;
         padding-left: 100%; /* Start off-screen right */
     }}
 
