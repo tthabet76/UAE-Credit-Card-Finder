@@ -1,0 +1,68 @@
+TEST SUITE RESULTS
+
+====================
+AGENT 1 TEST: NBQ
+====================
+{
+  "bank_name": "NBQ",
+  "cards": [
+    {
+      "url": "https://nbq.ae/personal/cards/nbq-infinite-credit-card",
+      "name": "Infinite Credit Card"
+    },
+    {
+      "url": "https://nbq.ae/personal/cards/nbq-platinum-credit-card",
+      "name": "Platinum Credit Card"
+    },
+    {
+      "url": "https://nbq.ae/personal/cards/nbq-gold-credit-card",
+      "name": "Gold Credit Card"
+    }
+  ],
+  "card_count": 3,
+  "method": "Specific"
+}
+
+====================
+AGENT 2 TEST: Dubai First Cashback Credit Card
+====================
+{
+  "success": true,
+  "url": "https://www.dubaifirst.com/en-ae/cashback-credit-card",
+  "llm_data": {
+    "Card Name": "Dubai First Cashback Credit Card",
+    "Bank Name": "First Abu Dhabi Bank PJSC",
+    "Minimum Salary Requirement": "5,000 minimum monthly salary",
+    "Annual Fee": "399",
+    "Minimum Spend Requirement": "4,000 minimum monthly spend required for discounted cinema tickets",
+    "Balance Transfer / 0% Installment Plan Eligibility": "Not Mentioned",
+    "Welcome Bonus / Sign-up Offer": "Not Mentioned",
+    "Cashback Rates": "5% cashback on groceries, dining out, and fuel. Cashback is capped at 150 per month per category.",
+    "Points / Miles Earning Rates": "Not Mentioned (Cashback Card)",
+    "Co-brand Specific Rewards": "Not Mentioned",
+    "Airport Lounge Access": "Free airport lounge access with the Mastercard Travel Pass app",
+    "Travel Insurance": "Not Mentioned",
+    "Airport Transfers": "Not Mentioned",
+    "Hotel Discounts / Upgrades": "Discounts on booking.com, IHG Hotels and Resorts, and other travel discounts through Mastercard Priceless benefits.",
+    "Cinema Offers": "Up to 4 standard movie tickets every month from only 20 at VOX Cinemas (conditional on 4,000 spend in the previous month). Includes soft drink and pop size upgrades.",
+    "Dining Discounts": "5% cashback when dining out (restaurants, cafes, bars/nightclubs, fast food). 20% off Talabat delivery (food or grocery) per month.",
+    "Golf Privileges": "Not Mentioned",
+    "Valet Parking": "Not Mentioned",
+    "Purchase Protection": "Not Mentioned",
+    "Extended Warranty": "Not Mentioned",
+    "Other Key Benefits": "Instant cashback redemption/credit via the mobile app; 25% discount on Fiit.tv subscriptions."
+  },
+  "log_data": [
+    "https://www.dubaifirst.com/en-ae/cashback-credit-card",
+    "Dubai First",
+    "Dubai First Cashback Credit Card",
+    "Dubai First Cashback Credit Card\nBenefit from instant cashback on your everyday spending.\nMinimum monthly salary \ueadf 5,000\nAnnual fees \ueadf 399\nApply Now\nPut money back in your wallet while you enjoy great benefits and receive instant cashback when you spend.\nKey Features\nInstant cashback on your spending\n5% cashback on groceries, dining out and fuel\nMovie tickets from only \ueadf 20\nFree airport lounge access\nGreat Cashback Benefits\nCashback earning is capped at \ueadf 150 per month per category.\nInstant cashback\nEarning and spending cashback is quick and easy through the Dubai First Mobile App. Save your cashback for a special purchase or add it back as credit to your card when you need it.\n5% cashback when you spend at the supermarket\nGrab those groceries! Get 5% cashback on all your supermarket spending including supermarket spending online.\nLearn more\n5% cashback when you dine out\nEnjoy eating at your favourite restaurants. Get 5% cashback each time you dine out including restaurants, cafes, bars/nightclubs and fast food too.\nLifestyle Benefits That Make All the Difference\nEnjoy going to the movies from \ueadf 20\nGet up to 4 standard movie tickets every month from only \ueadf 20 at VOX Cinemas if you spend \ueadf 4,000 in the previous month. Plus you\u2019ll get a soft drink and pop size upgrades.\nLearn more\nGet 20% off Talabat delivery\nGet 20% off on food or grocery delivery a month with Talabat.\nLearn more\nA 25% discount on home fitness Fiit.tv subscriptions\nGet a 25% discount on your first Fiit.tv subscription and enjoy 800+ workouts with world class trainers across Barre, HITT, strength, yoga and more.\nMemorable and Affordable Travel Experiences\nTravel better with free airport lounge access\nGet free airport lounge access with the Mastercard Travel Pass app.\nLearn more\nEnjoy great travel discounts on hotels, car hire and more\nGet discounts on booking.com, IHG Hotels and Resorts, Avis, Rentalcars.com, Cleartrip and much more through Mastercard Priceless benefits.\nLearn more\nFind out more about our Fees, Terms & Conditions\nDubai First Master Credit Card\nPDF\nDubai First Cashback Rewards\nPDF\nSchedule of charges\nPDF\nWarning\nIf you make only the minimum repayment/payment each period, you will pay more in interest/profit/fees and it will take you longer to pay off your outstanding balance.\nApply for your Dubai First Card instantly on the Dubai First Mobile app.\nThe start to your mobile-first experience with the next generation credit card.\nApply for your credit cards instantly. Enjoy an easy, seamless and intuitive experience. No paperwork. No in-person meetings required. All you need is your Emirates ID and IBAN.\nGet the app\nStill need more support?\nVisit our dedicated Help and Support page for more, or reach out on:\nFor inquiries Existing customers within the UAE\n800 33 600545500\n\nInternational Call Email ID\n+971 4 352 8228 contactus@dubaifirst.com\n\nQuick Links\nCopyright 2025 \u00a9 Dubai First. All rights reserved. Dubai First is a trademark owned by First Abu Dhabi Bank PJSC.",
+    "```json\n{\n  \"Card Name\": \"Dubai First Cashback Credit Card\",\n  \"Bank Name\": \"First Abu Dhabi Bank PJSC\",\n  \"Minimum Salary Requirement\": \"5,000 minimum monthly salary\",\n  \"Annual Fee\": \"399\",\n  \"Minimum Spend Requirement\": \"4,000 minimum monthly spend required for discounted cinema tickets\",\n  \"Balance Transfer / 0% Installment Plan Eligibility\": \"Not Mentioned\",\n  \"Welcome Bonus / Sign-up Offer\": \"Not Mentioned\",\n  \"Cashback Rates\": \"5% cashback on groceries, dining out, and fuel. Cashback is capped at 150 per month per category.\",\n  \"Points / Miles Earning Rates\": \"Not Mentioned (Cashback Card)\",\n  \"Co-brand Specific Rewards\": \"Not Mentioned\",\n  \"Airport Lounge Access\": \"Free airport lounge access with the Mastercard Travel Pass app\",\n  \"Travel Insurance\": \"Not Mentioned\",\n  \"Airport Transfers\": \"Not Mentioned\",\n  \"Hotel Discounts / Upgrades\": \"Discounts on booking.com, IHG Hotels and Resorts, and other travel discounts through Mastercard Priceless benefits.\",\n  \"Cinema Offers\": \"Up to 4 standard movie tickets every month from only 20 at VOX Cinemas (conditional on 4,000 spend in the previous month). Includes soft drink and pop size upgrades.\",\n  \"Dining Discounts\": \"5% cashback when dining out (restaurants, cafes, bars/nightclubs, fast food). 20% off Talabat delivery (food or grocery) per month.\",\n  \"Golf Privileges\": \"Not Mentioned\",\n  \"Valet Parking\": \"Not Mentioned\",\n  \"Purchase Protection\": \"Not Mentioned\",\n  \"Extended Warranty\": \"Not Mentioned\",\n  \"Other Key Benefits\": \"Instant cashback redemption/credit via the mobile app; 25% discount on Fiit.tv subscriptions.\"\n}\n```",
+    "SUCCESS"
+  ]
+}
+
+====================
+AGENT 3 TEST: Dubai First Cashback Credit Card
+====================
+Image URL: 

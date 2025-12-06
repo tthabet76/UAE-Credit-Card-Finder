@@ -1,0 +1,4 @@
+--- Investigating Emirates Islamic: Skywards Black ---
+MATCH SRC: https://www.emiratesislamic.ae/-/media/ei/images/cards/mobile-image/skywards_black_credit_card_600x500.jpg?h=500&w=600&la=en&hash=BA20D0049435C7DA91F17335DFDFC81F
+      ALT: Emirates Islamic Skywards Black Credit Card
+MATCH TILE: https://www.emiratesislamic.ae/-/media/ei/images/promotions/tile-images/550x375/mazaya_offers_550x375.jpg?h=375&w=550&la=en&hash=71438EF146C24B93B49A12C0144B4A5F

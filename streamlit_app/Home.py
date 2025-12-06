@@ -10,6 +10,9 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
+# --- LOAD CSS STYLES ---
+load_css()
+
 # --- THEME TOGGLE (SIDEBAR TOP) ---
 if 'theme' not in st.session_state:
     st.session_state.theme = 'dark'
@@ -193,6 +196,26 @@ st.markdown("""
 
     div.stButton > button:active {
         transform: scale(0.98);
+    }
+
+    /* Hide Streamlit Image Fullscreen Button - Camouflage Strategy */
+    button[title="View fullscreen"], 
+    button[title="Fullscreen"],
+    [data-testid="StyledFullScreenButton"],
+    [data-testid="stImage"] button {
+        opacity: 0 !important;
+        background-color: #0f172a !important; /* Match dark background */
+        color: #0f172a !important; /* Match dark background */
+        border: none !important;
+        box-shadow: none !important;
+        pointer-events: none !important;
+    }
+    
+    /* Ensure the icon inside is also hidden */
+    [data-testid="StyledFullScreenButton"] svg,
+    [data-testid="stImage"] button svg {
+        fill: #0f172a !important;
+        color: #0f172a !important;
     }
 </style>
 """, unsafe_allow_html=True)

@@ -418,6 +418,62 @@ def load_css():
             }}
         }}
 
+        /* --- SIDEBAR TOGGLE CUSTOMIZATION --- */
+        /* Target the container */
+        [data-testid="stSidebarCollapsedControl"] {{
+            color: #38bdf8 !important; /* Light Blue */
+            font-weight: 700 !important;
+            display: flex !important;
+            align-items: center !important;
+            border: 1px solid rgba(56, 189, 248, 0.2);
+            border-radius: 8px;
+            padding: 2px 10px;
+            background: rgba(56, 189, 248, 0.1);
+            transition: all 0.3s ease;
+        }}
+
+        [data-testid="stSidebarCollapsedControl"]:hover {{
+            background: rgba(56, 189, 248, 0.2);
+            border-color: #38bdf8;
+            box-shadow: 0 0 10px rgba(56, 189, 248, 0.3);
+        }}
+        
+        /* Target the SVG icon specifically */
+        [data-testid="stSidebarCollapsedControl"] svg,
+        [data-testid="stSidebarCollapsedControl"] svg path {{
+            fill: #38bdf8 !important;
+            color: #38bdf8 !important;
+        }}
+        
+        /* Add "Menu" label */
+        [data-testid="stSidebarCollapsedControl"]::after {{
+            content: "Menu";
+            margin-left: 8px;
+            font-size: 1rem;
+            color: #38bdf8 !important; /* Light Blue */
+            font-weight: 600;
+            padding-bottom: 2px; /* Alignment tweak */
+        }}
+
+        /* --- HOVER FIXES --- */
+        /* Prevent white box/highlight on link hover */
+        a.card-link {{
+            text-decoration: none !important;
+            background: transparent !important;
+        }}
+        
+        a.card-link:hover {{
+            background-color: transparent !important;
+            background: transparent !important;
+            text-decoration: none !important;
+            box-shadow: none !important;
+        }}
+
+        /* Disable pointer events on image to prevent tooltips */
+        .card-img {{
+            pointer-events: none !important;
+        }}
+
         /* --- GLASS SHEET MODAL (CSS ONLY) --- */
         .modal-overlay {{
             position: fixed;
@@ -748,7 +804,8 @@ def get_card_html(row):
 
     html = f"""
     <!-- Card Trigger -->
-    <a href="#modal-{row['id']}" style="text-decoration: none; color: inherit; display: block;">
+    <!-- Card Trigger -->
+    <a href="#modal-{row['id']}" class="card-link" style="text-decoration: none; color: inherit; display: block;">
         <div class="glass-card">
             <div class="card-content">
                 <div class="card-image-container">
@@ -756,12 +813,12 @@ def get_card_html(row):
                 </div>
                 <div class="card-details">
                     <div class="card-header">
-                        <h3 class="card-title">{row['card_name']}</h3>
                         <p class="card-bank">{row['bank_name']}</p>
+                        <h4 class="card-title">{row['card_name']}</h4>
                     </div>
-                    <div class="card-stats">
+                    <div class="stats-grid">
                         <div class="stat-item">
-                            <span class="stat-label">Annual Fee</span>
+                            <span class="stat-label">Fee</span>
                             <span class="stat-value">{fmt(row['annual_fee'])}</span>
                         </div>
                         <div class="stat-item">
@@ -784,20 +841,18 @@ def get_card_html(row):
 
     <!-- Glass Sheet Modal -->
     <div id="modal-{row['id']}" class="modal-overlay">
-        <a href="#" class="modal-close-area" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; cursor: default;"></a>
         <div class="modal-content">
-            <a href="#" class="modal-close">&times;</a>
+            <a href="#" class="modal-close">×</a>
             <div class="modal-header">
                 <div class="modal-img-container">
                     <img src="{image_src}" class="modal-img" alt="{row['card_name']}">
                 </div>
-                <h2 class="modal-title">{row['card_name']}</h2>
+                <h3 class="modal-title">{row['card_name']}</h3>
                 <p class="modal-bank">{row['bank_name']}</p>
             </div>
             
             <div class="modal-body">
-                <!-- 1. Financials Section -->
-                <div class="modal-section-title">💳 Financials</div>
+                <!-- Key Stats Grid -->
                 <div class="modal-grid">
                     <div class="modal-stat-box">
                         <span class="modal-stat-label">Annual Fee</span>
@@ -812,77 +867,57 @@ def get_card_html(row):
                         <span class="modal-stat-value">{fmt(row.get('minimum_spend'))}</span>
                     </div>
                     <div class="modal-stat-box">
-                        <span class="modal-stat-label">Cashback</span>
-                        <span class="modal-stat-value">{fmt(row.get('cashback_summary'))}</span>
+                        <span class="modal-stat-label">Foreign Fee</span>
+                        <span class="modal-stat-value">{fmt(row.get('foreign_currency_fee'))}</span>
                     </div>
                 </div>
 
-                <!-- 2. Rewards & Benefits -->
-                <div class="modal-section-title">🎁 Rewards & Benefits</div>
-                <ul class="modal-benefits-list">
-                    <li class="modal-benefit-item">
-                        <span class="benefit-icon">🌍</span>
-                        <div><strong>Foreign Fee:</strong> {fmt(row.get('foreign_currency_fee'))}</div>
-                    </li>
-                    <li class="modal-benefit-item">
-                        <span class="benefit-icon">✈️</span>
-                        <div><strong>Travel Points:</strong> {fmt(row.get('travel_points_summary'))}</div>
-                    </li>
-                    <li class="modal-benefit-item">
-                        <span class="benefit-icon">🏷️</span>
-                        <div><strong>Special Discounts:</strong> {fmt(row.get('special_discount_summary'))}</div>
-                    </li>
-                    <li class="modal-benefit-item">
-                        <span class="benefit-icon">🎁</span>
-                        <div><strong>Welcome Bonus:</strong> {fmt(row['welcome_bonus'])}</div>
-                    </li>
-                </ul>
+                <!-- Text Content -->
+                <div class="modal-section-title">
+                    <span>🏆</span> Welcome Bonus
+                </div>
+                <div class="modal-text-content">
+                    {fmt(row['welcome_bonus'])}
+                </div>
 
-                <!-- 3. Lifestyle -->
-                <div class="modal-section-title">🥂 Lifestyle</div>
-                <ul class="modal-benefits-list">
-                    <li class="modal-benefit-item">
-                        <span class="benefit-icon">🍽️</span>
-                        <div><strong>Dining:</strong> {fmt(row.get('hotel_dining_offers'))}</div>
-                    </li>
-                    <li class="modal-benefit-item">
-                        <span class="benefit-icon">⛳</span>
-                        <div><strong>Golf & Wellness:</strong> {fmt(row.get('golf_wellness'))}</div>
-                    </li>
-                    <li class="modal-benefit-item">
-                        <span class="benefit-icon">🎬</span>
-                        <div><strong>Cinema:</strong> {fmt(row.get('cinema_offers'))}</div>
-                    </li>
-                </ul>
-
-                <!-- 4. Travel -->
-                <div class="modal-section-title">🌍 Travel</div>
-                <ul class="modal-benefits-list">
-                    <li class="modal-benefit-item">
-                        <span class="benefit-icon">🛋️</span>
-                        <div><strong>Lounge Access:</strong> {fmt(row.get('airport_lounge_access'))}</div>
-                    </li>
-                    <li class="modal-benefit-item">
-                        <span class="benefit-icon">🛡️</span>
-                        <div><strong>Insurance:</strong> {fmt(row.get('travel_insurance'))}</div>
-                    </li>
-                    <li class="modal-benefit-item">
-                        <span class="benefit-icon">🚕</span>
-                        <div><strong>Transfers:</strong> {fmt(row.get('airport_transfers'))}</div>
-                    </li>
-                </ul>
+                <div class="modal-section-title">
+                    <span>💳</span> Cashback & Rewards
+                </div>
+                <div class="modal-text-content">
+                    {fmt(row.get('cashback_summary'))}
+                </div>
                 
-                <!-- 5. Other Benefits -->
-                <div class="modal-section-title">✨ Other Perks</div>
+                <div class="modal-section-title">
+                    <span>✈️</span> Travel Benefits
+                </div>
+                <div class="modal-text-content">
+                    {fmt(row.get('travel_points_summary'))}
+                </div>
+
+                <!-- Key Benefits List -->
+                <div class="modal-section-title">
+                    <span>✨</span> Other Perkes (Lounge, Dining, etc.)
+                </div>
                 <ul class="modal-benefits-list">
                     {benefits_html}
                 </ul>
             </div>
 
             <div class="modal-footer">
-                <a href="{row['url']}" target="_blank" class="apply-btn">Apply Now 🔗</a>
+                <a href="#" style="
+                    display: block; 
+                    width: 100%; 
+                    padding: 15px; 
+                    background: linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%); 
+                    color: white; 
+                    text-align: center; 
+                    text-decoration: none; 
+                    font-weight: 700; 
+                    border-radius: 12px;
+                    box-shadow: 0 4px 15px rgba(6, 182, 212, 0.4);
+                ">Apply Now / View Details</a>
             </div>
         </div>
     </div>
     """
-    return html.replace('\n', ' ')
+    return html
