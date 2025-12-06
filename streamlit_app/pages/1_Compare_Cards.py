@@ -154,14 +154,18 @@ show_higher_salary = st.sidebar.checkbox("Show cards requiring HIGHER salary", v
 # Sort Option
 st.sidebar.markdown("---")
 st.sidebar.subheader("📊 Sorting")
-sort_by_cashback = st.sidebar.toggle("Sort by Highest Cashback Rate")
+sort_option = st.sidebar.radio(
+    "Sort Cards By:",
+    ["Default", "Highest Cashback", "Best Travel Points", "Lowest Salary"],
+    index=0
+)
 
 # 4. Filter Logic
 try:
     filtered_df = df.copy()
 
     # Filter State Tracking to Reset Pagination
-    current_filter_state = f"{selected_banks}_{user_salary}_{show_higher_salary}_{sort_by_cashback}"
+    current_filter_state = f"{selected_banks}_{user_salary}_{show_higher_salary}_{sort_option}"
     
     if 'last_filter_state' not in st.session_state:
         st.session_state.last_filter_state = current_filter_state
@@ -181,11 +185,31 @@ try:
             # Default: Show cards where requirement <= user_salary OR requirement is 0 (Not Mentioned)
             filtered_df = filtered_df[(filtered_df['min_salary_numeric'] <= user_salary) | (filtered_df['min_salary_numeric'] == 0)]
 
-    if sort_by_cashback:
+    # Sorting Logic
+    if sort_option == "Highest Cashback":
         if 'max_cashback_rate' in filtered_df.columns:
             filtered_df = filtered_df.sort_values(by='max_cashback_rate', ascending=False)
         else:
             st.warning("Cashback data not available for sorting.")
+            
+    elif sort_option == "Lowest Salary":
+        # Sort by salary ascending (0/Not Mentioned at bottom ideally, but 0 is usually lowest)
+        # To put 0 at bottom, we can replace 0 with infinity for sorting
+        filtered_df['sort_salary'] = filtered_df['min_salary_numeric'].replace(0, 999999)
+        filtered_df = filtered_df.sort_values(by='sort_salary', ascending=True)
+        
+    elif sort_option == "Best Travel Points":
+        # Sort by presence of travel points data
+        # Create a flag: 1 if has data, 0 if None/"Not Mentioned"
+        def has_travel_data(val):
+            if not val: return 0
+            s = str(val).strip().lower()
+            if s in ["not mentioned", "none", "nan", "", "n/a"]: return 0
+            return 1
+            
+        filtered_df['has_travel'] = filtered_df['travel_points_summary'].apply(has_travel_data)
+        # Sort by flag descending (has data first)
+        filtered_df = filtered_df.sort_values(by='has_travel', ascending=False)
 
 except Exception as e:
     st.error(f"Error filtering data: {e}")
