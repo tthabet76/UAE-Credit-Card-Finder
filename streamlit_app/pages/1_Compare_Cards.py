@@ -7,6 +7,27 @@ from db_utils import fetch_all_cards
 load_css()
 st.title("Compare Credit Cards")
 
+# 1.1 Query Parameter Logic (Triggered by Floating Bar)
+if "action" in st.query_params:
+    action = st.query_params["action"]
+    if action == "compare":
+        st.query_params.clear()
+        # We need to defer the dialog show until after the app runs, 
+        # but since st.dialog is a decorator, we just set a flag or call it if possible.
+        # However, calling it directly here might be too early if data isn't loaded.
+        # Better approach: Set a session state flag.
+        st.session_state.show_comparison = True
+    elif action == "clear":
+        st.query_params.clear()
+        st.session_state.selected_cards = []
+        st.session_state.show_comparison = False
+        st.rerun()
+
+if st.session_state.get("show_comparison", False):
+    # We need to define the dialog function first, but it's defined later.
+    # So we will handle the actual showing AFTER the function definition.
+    pass
+
 # 2. Data Fetching
 @st.cache_data(ttl=3600)
 def get_cards():
@@ -219,30 +240,136 @@ def show_comparison_dialog():
     else:
         # Render Comparison Table
         cols = st.columns(len(comparison_df))
+        # Helper to format "Not Mentioned" as "---"
+        def fmt(val):
+            if val is None:
+                return "---"
+            s = str(val).strip()
+            if s in ["Not Mentioned", "None", "nan", "", "N/A"]:
+                return "---"
+            return s
+
         for i, (idx, row) in enumerate(comparison_df.iterrows()):
             with cols[i]:
                 st.markdown(get_card_html(row), unsafe_allow_html=True)
                 st.markdown("---")
-                st.markdown(f"**Fee:** {row['annual_fee']}")
-                st.markdown(f"**Salary:** {row['minimum_salary_requirement']}")
-                st.markdown(f"**Spend:** {row['minimum_spend_requirement']}")
-                st.markdown(f"**Bonus:** {row['welcome_bonus']}")
+                st.markdown(f"**Fee:** {fmt(row['annual_fee'])}")
+                st.markdown(f"**Salary:** {fmt(row['minimum_salary_requirement'])}")
+                st.markdown(f"**Spend:** {fmt(row.get('minimum_spend'))}")
+                st.markdown(f"**Cashback:** {fmt(row.get('cashback_summary'))}")
+                st.markdown(f"**Points:** {fmt(row.get('travel_points_summary'))}")
+                st.markdown(f"**Dining:** {fmt(row.get('hotel_dining_offers'))}")
+                st.markdown(f"**Lounge:** {fmt(row.get('airport_lounge_access'))}")
+                st.markdown(f"**Foreign Fee:** {fmt(row.get('foreign_currency_fee'))}")
+                st.markdown(f"**Bonus:** {fmt(row['welcome_bonus'])}")
 
     st.markdown("---")
     if st.button("Close & Clear Selection", type="primary", use_container_width=True):
         clear_all_selections()
         st.rerun()
 
-col_actions = st.columns([0.6, 0.2, 0.2])
-with col_actions[1]:
-    if st.session_state.selected_cards:
-        if st.button("Clear", type="secondary", use_container_width=True):
-            clear_all_selections()
-            st.rerun()
-with col_actions[2]:
-    if st.session_state.selected_cards:
-        if st.button(f"Compare ({len(st.session_state.selected_cards)})", type="primary", use_container_width=True):
-            show_comparison_dialog()
+# Trigger Dialog if flag is set
+if st.session_state.get("show_comparison", False):
+    show_comparison_dialog()
+    # Reset flag after showing? No, the dialog handles its own state usually.
+    # But for st.dialog, it's a modal.
+    st.session_state.show_comparison = False
+
+# --- FLOATING ACTION BAR ---
+if st.session_state.selected_cards:
+    count = len(st.session_state.selected_cards)
+    
+    # CSS for Floating Bar
+    st.markdown("""
+    <style>
+        .floating-bar {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(15, 23, 42, 0.95); /* Dark Slate */
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            padding: 12px 24px;
+            border-radius: 50px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            z-index: 999999;
+            min-width: 320px;
+            justify-content: space-between;
+            animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        
+        @keyframes slideUp {
+            from { transform: translate(-50%, 100%); opacity: 0; }
+            to { transform: translate(-50%, 0); opacity: 1; }
+        }
+
+        .floating-text {
+            color: #f8fafc;
+            font-weight: 600;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .floating-badge {
+            background: rgba(255,255,255,0.1);
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            color: #94a3b8;
+        }
+
+        .floating-btn-primary {
+            background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+            color: white !important;
+            padding: 10px 24px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 0.95rem;
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+            transition: all 0.2s ease;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .floating-btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(59, 130, 246, 0.5);
+            color: white !important;
+        }
+        
+        .floating-btn-secondary {
+            color: #94a3b8 !important;
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            padding: 8px 12px;
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+        
+        .floating-btn-secondary:hover {
+            color: #f1f5f9 !important;
+            background: rgba(255,255,255,0.05);
+        }
+    </style>
+    
+    <div class="floating-bar">
+        <div class="floating-text">
+            <span>Selected</span>
+            <span class="floating-badge">{count}</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <a href="?action=clear" target="_self" class="floating-btn-secondary">Clear</a>
+            <a href="?action=compare" target="_self" class="floating-btn-primary">Compare Now 🚀</a>
+        </div>
+    </div>
+    """.replace("{count}", str(count)), unsafe_allow_html=True)
 
 # Pagination Logic
 if 'page_number' not in st.session_state:

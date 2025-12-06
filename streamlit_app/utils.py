@@ -722,6 +722,15 @@ def get_card_html(row):
     # Get the image source (Base64 or URL)
     image_src = get_card_image_source(row)
     
+    # Helper to format "Not Mentioned" as "---"
+    def fmt(val):
+        if val is None:
+            return "---"
+        s = str(val).strip()
+        if s in ["Not Mentioned", "None", "nan", "", "N/A"]:
+            return "---"
+        return s
+
     # Parse benefits list (assuming stored as JSON string or comma-separated)
     benefits_html = ""
     try:
@@ -753,11 +762,11 @@ def get_card_html(row):
                     <div class="card-stats">
                         <div class="stat-item">
                             <span class="stat-label">Annual Fee</span>
-                            <span class="stat-value">{row['annual_fee']}</span>
+                            <span class="stat-value">{fmt(row['annual_fee'])}</span>
                         </div>
                         <div class="stat-item">
                             <span class="stat-label">Min Salary</span>
-                            <span class="stat-value">{row['minimum_salary_requirement']}</span>
+                            <span class="stat-value">{fmt(row['minimum_salary_requirement'])}</span>
                         </div>
                     </div>
                     <div class="card-benefits">
@@ -787,32 +796,84 @@ def get_card_html(row):
             </div>
             
             <div class="modal-body">
+                <!-- 1. Financials Section -->
+                <div class="modal-section-title">💳 Financials</div>
                 <div class="modal-grid">
                     <div class="modal-stat-box">
                         <span class="modal-stat-label">Annual Fee</span>
-                        <span class="modal-stat-value">{row['annual_fee']}</span>
+                        <span class="modal-stat-value">{fmt(row['annual_fee'])}</span>
                     </div>
                     <div class="modal-stat-box">
                         <span class="modal-stat-label">Min Salary</span>
-                        <span class="modal-stat-value">{row['minimum_salary_requirement']}</span>
+                        <span class="modal-stat-value">{fmt(row['minimum_salary_requirement'])}</span>
                     </div>
                     <div class="modal-stat-box">
                         <span class="modal-stat-label">Min Spend</span>
-                        <span class="modal-stat-value">{row['minimum_spend_requirement']}</span>
+                        <span class="modal-stat-value">{fmt(row.get('minimum_spend'))}</span>
                     </div>
                     <div class="modal-stat-box">
-                        <span class="modal-stat-label">Balance Transfer</span>
-                        <span class="modal-stat-value">{row['balance_transfer_eligibility']}</span>
+                        <span class="modal-stat-label">Cashback</span>
+                        <span class="modal-stat-value">{fmt(row.get('cashback_summary'))}</span>
                     </div>
                 </div>
 
-                <div class="modal-section-title">🎁 Welcome Bonus</div>
-                <p class="modal-text-content">{row['welcome_bonus']}</p>
+                <!-- 2. Rewards & Benefits -->
+                <div class="modal-section-title">🎁 Rewards & Benefits</div>
+                <ul class="modal-benefits-list">
+                    <li class="modal-benefit-item">
+                        <span class="benefit-icon">🌍</span>
+                        <div><strong>Foreign Fee:</strong> {fmt(row.get('foreign_currency_fee'))}</div>
+                    </li>
+                    <li class="modal-benefit-item">
+                        <span class="benefit-icon">✈️</span>
+                        <div><strong>Travel Points:</strong> {fmt(row.get('travel_points_summary'))}</div>
+                    </li>
+                    <li class="modal-benefit-item">
+                        <span class="benefit-icon">🏷️</span>
+                        <div><strong>Special Discounts:</strong> {fmt(row.get('special_discount_summary'))}</div>
+                    </li>
+                    <li class="modal-benefit-item">
+                        <span class="benefit-icon">🎁</span>
+                        <div><strong>Welcome Bonus:</strong> {fmt(row['welcome_bonus'])}</div>
+                    </li>
+                </ul>
 
-                <div class="modal-section-title">💰 Cashback & Rewards</div>
-                <p class="modal-text-content">{row['cashback_rates']}</p>
+                <!-- 3. Lifestyle -->
+                <div class="modal-section-title">🥂 Lifestyle</div>
+                <ul class="modal-benefits-list">
+                    <li class="modal-benefit-item">
+                        <span class="benefit-icon">🍽️</span>
+                        <div><strong>Dining:</strong> {fmt(row.get('hotel_dining_offers'))}</div>
+                    </li>
+                    <li class="modal-benefit-item">
+                        <span class="benefit-icon">⛳</span>
+                        <div><strong>Golf & Wellness:</strong> {fmt(row.get('golf_wellness'))}</div>
+                    </li>
+                    <li class="modal-benefit-item">
+                        <span class="benefit-icon">🎬</span>
+                        <div><strong>Cinema:</strong> {fmt(row.get('cinema_offers'))}</div>
+                    </li>
+                </ul>
+
+                <!-- 4. Travel -->
+                <div class="modal-section-title">🌍 Travel</div>
+                <ul class="modal-benefits-list">
+                    <li class="modal-benefit-item">
+                        <span class="benefit-icon">🛋️</span>
+                        <div><strong>Lounge Access:</strong> {fmt(row.get('airport_lounge_access'))}</div>
+                    </li>
+                    <li class="modal-benefit-item">
+                        <span class="benefit-icon">🛡️</span>
+                        <div><strong>Insurance:</strong> {fmt(row.get('travel_insurance'))}</div>
+                    </li>
+                    <li class="modal-benefit-item">
+                        <span class="benefit-icon">🚕</span>
+                        <div><strong>Transfers:</strong> {fmt(row.get('airport_transfers'))}</div>
+                    </li>
+                </ul>
                 
-                <div class="modal-section-title">✨ Key Benefits</div>
+                <!-- 5. Other Benefits -->
+                <div class="modal-section-title">✨ Other Perks</div>
                 <ul class="modal-benefits-list">
                     {benefits_html}
                 </ul>
