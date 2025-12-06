@@ -119,6 +119,10 @@ def show_bank_selector():
 if st.sidebar.button("See All Banks 🏦"):
     show_bank_selector()
 
+if st.sidebar.button("Clear Filters 🧹"):
+    st.session_state.selected_banks = []
+    st.rerun()
+
 # Use the session state for filtering
 selected_banks = st.session_state.selected_banks
 
