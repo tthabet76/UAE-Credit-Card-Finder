@@ -5,7 +5,7 @@ from db_utils import fetch_all_cards
 
 # 1. Setup
 load_css()
-st.title("Compare Credit Cards 🚀")
+st.title("Compare Credit Cards")
 
 # 1.1 Query Parameter Logic (Triggered by Floating Bar)
 if "action" in st.query_params:
