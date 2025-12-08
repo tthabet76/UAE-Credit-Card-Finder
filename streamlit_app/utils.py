@@ -716,31 +716,31 @@ def load_css():
         }
 
         /* Mobile Adjustments */
-        @media (max-width: 768px) {
-            .modal-overlay {
+        @media (max-width: 768px) {{
+            .modal-overlay {{
                 align-items: flex-end;
-            }
-            .modal-content {
+            }}
+            .modal-content {{
                 width: 100%;
                 max-width: 100%;
                 border-radius: 30px 30px 0 0;
                 max-height: 85vh;
                 transform: translateY(100%);
-            }
-            .modal-overlay:target .modal-content {
+            }}
+            .modal-overlay:target .modal-content {{
                 transform: translateY(0);
-            }
-            .modal-details-grid {
+            }}
+            .modal-details-grid {{
                 grid-template-columns: 1fr;
                 gap: 0;
-            }
-            .modal-header, .modal-body, .modal-footer {
+            }}
+            .modal-header, .modal-body, .modal-footer {{
                 padding: 25px;
-            }
-            .modal-title {
+            }}
+            .modal-title {{
                 font-size: 1.5rem;
-            }
-        }
+            }}
+        }}
     """, unsafe_allow_html=True)
 
 def parse_salary(salary_str):
