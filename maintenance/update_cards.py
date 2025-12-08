@@ -24,7 +24,7 @@ import toml
 
 load_dotenv(override=True)
 
-chromedriver_path = 'C:/Users/cdf846/Documents/personal/Credit card project/chromedriver.exe'
+chromedriver_path = os.path.join(os.path.dirname(__file__), 'chromedriver.exe')
 db_file = 'credit_card_data.db'
 
 # Try loading from secrets.toml first
