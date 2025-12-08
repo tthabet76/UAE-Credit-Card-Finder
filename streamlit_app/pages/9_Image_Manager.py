@@ -8,10 +8,9 @@ from db_utils import get_db_connection
 st.set_page_config(page_title="Image Manager", page_icon="🖼️", layout="wide")
 
 # --- ENVIRONMENT CHECK ---
-# Environment check removed for user access
-# if not st.secrets.get("is_local", False):
-#     st.warning("⚠️ This tool is only available in the local environment.")
-#     st.stop()
+if not st.secrets.get("is_local", False):
+    st.warning("⚠️ This tool is only available in the local environment.")
+    st.stop()
 
 load_css()
 
