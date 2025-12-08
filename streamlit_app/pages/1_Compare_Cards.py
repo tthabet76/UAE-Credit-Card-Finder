@@ -29,7 +29,7 @@ if st.session_state.get("show_comparison", False):
     pass
 
 # 2. Data Fetching
-@st.cache_data(ttl=3600)
+@st.cache_data(ttl=60)
 def get_cards():
     return fetch_all_cards()
 
@@ -40,12 +40,20 @@ with st.spinner("Loading cards..."):
         st.error(f"Failed to load data: {e}")
         st.stop()
 
+# Clean bank names to ensure consistent filtering
+if not df.empty and 'bank_name' in df.columns:
+    df['bank_name'] = df['bank_name'].astype(str).str.strip()
+
 if df.empty:
     st.warning("No cards found.")
     st.stop()
 
 # 3. Filters
 st.sidebar.header("Filters")
+
+# Keyword Search
+search_term = st.sidebar.text_input("🔍 Search Cards", placeholder="e.g. Platinum, Cashback...").strip().lower()
+st.sidebar.markdown("---")
 
 # Bank Filter
 # Bank Filter
@@ -62,15 +70,27 @@ top_banks = [b for b in top_banks if b in banks]
 
 st.sidebar.subheader("Select Bank")
 
+# Callback to sync sidebar checkbox with session state list
+def toggle_sidebar_bank(bank_name):
+    key = f"chk_{bank_name}"
+    is_checked = st.session_state.get(key, False)
+    if is_checked:
+        if bank_name not in st.session_state.selected_banks:
+            st.session_state.selected_banks.append(bank_name)
+    else:
+        if bank_name in st.session_state.selected_banks:
+            st.session_state.selected_banks.remove(bank_name)
+
 # 1. Render Top 5 Checkboxes
 for bank in top_banks:
     is_checked = bank in st.session_state.selected_banks
-    if st.sidebar.checkbox(bank, value=is_checked, key=f"chk_{bank}"):
-        if bank not in st.session_state.selected_banks:
-            st.session_state.selected_banks.append(bank)
-    else:
-        if bank in st.session_state.selected_banks:
-            st.session_state.selected_banks.remove(bank)
+    st.sidebar.checkbox(
+        bank, 
+        value=is_checked, 
+        key=f"chk_{bank}", 
+        on_change=toggle_sidebar_bank, 
+        args=(bank,)
+    )
 
 # 2. "See All" Modal Logic
 @st.dialog("Select Banks", width="large")
@@ -180,6 +200,9 @@ try:
 
     if selected_banks:
         filtered_df = filtered_df[filtered_df['bank_name'].isin(selected_banks)]
+
+    if search_term:
+        filtered_df = filtered_df[filtered_df['card_name'].str.lower().str.contains(search_term, na=False)]
 
     if user_salary > 0:
         if show_higher_salary:

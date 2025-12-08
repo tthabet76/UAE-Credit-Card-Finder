@@ -53,5 +53,6 @@ venv.bak/
 archive_dec_2025/
 
 # Local Admin Tools (Do not deploy)
-streamlit_app/pages/9_Image_Manager.py
-streamlit_app/pages/9_Image_Mapper.py
+# Local Admin Tools (Do not deploy)
+# streamlit_app/pages/9_Image_Manager.py
+# streamlit_app/pages/9_Image_Mapper.py

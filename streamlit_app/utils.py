@@ -11,7 +11,7 @@ def load_css():
 
     theme = st.session_state.theme
 
-    # Define Theme Palettes
+    # Define Theme Palettes (Standard CSS strings, no doubling needed here as they are vars)
     if theme == 'dark':
         css_vars = """
         :root {
@@ -57,6 +57,7 @@ def load_css():
         }
         """
 
+    # Injecting CSS: NOTE ALL BRACES MUST BE DOUBLED {{ }} EXCEPT F-STRING VARS {var}
     st.markdown(f"""
     <style>
         /* Import modern font */
@@ -474,42 +475,42 @@ def load_css():
             pointer-events: none !important;
         }}
 
-        /* --- GLASS SHEET MODAL (CSS ONLY) --- */
+        /* --- GLASS SHEET MODAL (PREMIUM) --- */
         .modal-overlay {{
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.6);
-            backdrop-filter: blur(4px);
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(8px);
             z-index: 9999;
             opacity: 0;
-            display: none; /* Changed from visibility: hidden to display: none */
+            display: none;
             transition: opacity 0.3s ease;
             align-items: center;
             justify-content: center;
         }}
 
-        /* Show modal when target is active */
         .modal-overlay:target {{
             opacity: 1;
-            display: flex; /* Show when targeted */
+            display: flex;
         }}
 
         .modal-content {{
-            background: rgba(30, 41, 59, 0.95); /* Dark Slate */
-            backdrop-filter: blur(15px);
-            border-radius: 20px;
-            width: 90%;
-            max-width: 600px;
-            max-height: 85vh;
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(24px) saturate(180%);
+            -webkit-backdrop-filter: blur(24px) saturate(180%);
+            border-radius: 24px;
+            width: 95%;
+            max-width: 800px;
+            max-height: 90vh;
             overflow-y: auto;
             position: relative;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            transform: scale(0.95);
-            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-shadow: 0 50px 100px -20px rgba(0, 0, 0, 0.7), inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            transform: scale(0.96);
+            transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
             display: flex;
             flex-direction: column;
         }}
@@ -520,159 +521,228 @@ def load_css():
 
         .modal-close {{
             position: absolute;
-            top: 15px;
-            right: 15px;
-            background: rgba(255, 255, 255, 0.1);
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.05);
             border-radius: 50%;
-            width: 32px;
-            height: 32px;
+            width: 36px;
+            height: 36px;
             display: flex;
             align-items: center;
             justify-content: center;
             text-decoration: none;
-            color: #f8fafc;
-            font-weight: bold;
-            font-size: 1.2rem;
-            z-index: 10;
-            transition: background 0.2s;
+            color: #cbd5e1;
+            font-size: 1.5rem;
+            z-index: 20;
+            transition: all 0.2s;
+            border: 1px solid rgba(255,255,255,0.05);
         }}
         
         .modal-close:hover {{
-            background: rgba(0, 0, 0, 0.1);
+            background: rgba(255, 255, 255, 0.15);
+            color: white;
+            transform: rotate(90deg);
         }}
 
+        /* Modal Header */
         .modal-header {{
-            padding: 25px 25px 15px 25px;
-            border-bottom: 1px solid rgba(0,0,0,0.05);
+            padding: 40px 40px 20px 40px;
             text-align: center;
+            background: linear-gradient(to bottom, rgba(255,255,255,0.02), transparent);
         }}
         
         .modal-img-container {{
-            height: 140px;
+            height: 160px;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-bottom: 15px;
+            margin-bottom: 20px;
+            filter: drop-shadow(0 20px 40px rgba(0,0,0,0.3));
+            transition: transform 0.3s;
+        }}
+        
+        .modal-img-container:hover {{
+            transform: scale(1.05);
         }}
         
         .modal-img {{
             max-height: 100%;
             max-width: 100%;
             object-fit: contain;
-            filter: drop-shadow(0 8px 16px rgba(0,0,0,0.15));
         }}
 
         .modal-title {{
-            font-size: 1.5rem;
+            font-size: 2rem;
             font-weight: 800;
             color: #f8fafc !important;
             margin: 0;
-            line-height: 1.2;
+            line-height: 1.1;
+            letter-spacing: -0.02em;
+            background: linear-gradient(135deg, #fff 0%, #cbd5e1 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }}
         
         .modal-bank {{
             font-size: 0.9rem;
-            color: #cbd5e1 !important;
+            color: #94a3b8 !important;
             text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-top: 5px;
+            letter-spacing: 2px;
+            margin-top: 8px;
+            font-weight: 600;
         }}
 
+        /* Modal Body */
         .modal-body {{
-            padding: 25px;
+            padding: 30px 40px;
             flex: 1;
         }}
 
+        /* Key Stats Grid - Sleek Cards */
         .modal-grid {{
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
             gap: 15px;
-            margin-bottom: 25px;
+            margin-bottom: 40px;
         }}
         
         .modal-stat-box {{
-            background: rgba(255,255,255,0.05);
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 12px;
-            padding: 12px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 16px;
+            padding: 16px;
             text-align: center;
+            transition: background 0.2s, transform 0.2s;
+        }}
+        
+        .modal-stat-box:hover {{
+            background: rgba(255,255,255,0.06);
+            transform: translateY(-2px);
+            border-color: rgba(255,255,255,0.15);
         }}
         
         .modal-stat-label {{
-            font-size: 0.7rem;
+            font-size: 0.75rem;
             color: #94a3b8 !important;
             text-transform: uppercase;
+            letter-spacing: 0.5px;
             display: block;
-            margin-bottom: 4px;
+            margin-bottom: 6px;
+            font-weight: 600;
         }}
         
         .modal-stat-value {{
-            font-size: 0.95rem;
-            font-weight: 700;
-            color: #f8fafc !important;
-        }}
-
-        .modal-section-title {{
             font-size: 1rem;
             font-weight: 700;
-            margin: 20px 0 10px 0;
-            color: #e2e8f0 !important;
-            display: flex;
-            align-items: center;
-            gap: 8px;
+            color: #f1f5f9 !important;
         }}
 
-        .modal-benefits-list {{
-            list-style: none;
-            padding: 0;
-            margin: 0;
+        /* Sections */
+        .modal-section-title {{
+            font-size: 0.85rem;
+            font-weight: 700;
+            margin: 8px 0 2px 0;
+            color: #94a3b8 !important; /* Muted color for label */
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding-bottom: 0px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border: none;
+        }}
+        
+        .modal-text-content {{
+            font-size: 0.95rem;
+            color: #f1f5f9 !important;
+            line-height: 1.4;
+            background: rgba(255,255,255,0.03);
+            padding: 8px 12px;
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.05);
+            margin-bottom: 4px;
+        }}
+
+        /* Two Column Layout for Details */
+        .modal-details-grid {{
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
         }}
         
         .modal-benefit-item {{
             padding: 8px 0;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
             font-size: 0.95rem;
             color: #cbd5e1 !important;
             display: flex;
-            gap: 10px;
+            align-items: flex-start;
+            gap: 12px;
         }}
         
-        .modal-benefit-item:last-child {{
-            border-bottom: none;
+        .benefit-icon {{
+            color: #38bdf8; /* Sky Blue */
+            font-size: 1.1rem;
+            margin-top: -2px;
         }}
 
+        /* Footer */
         .modal-footer {{
-            padding: 20px;
-            background: rgba(30, 41, 59, 0.9);
-            border-top: 1px solid rgba(255,255,255,0.1);
+            padding: 25px 40px;
+            background: rgba(15, 23, 42, 0.8);
+            border-top: 1px solid rgba(255,255,255,0.08);
             position: sticky;
             bottom: 0;
-            backdrop-filter: blur(10px);
+            backdrop-filter: blur(20px);
+            z-index: 10;
+        }}
+        
+        .apply-btn {{
+            display: block; 
+            width: 100%; 
+            padding: 16px; 
+            background: linear-gradient(135deg, #0ea5e9 0%, #6366f1 100%); 
+            color: white !important; 
+            text-align: center; 
+            text-decoration: none; 
+            font-weight: 700; 
+            font-size: 1.1rem;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px -10px rgba(14, 165, 233, 0.6);
+            transition: all 0.3s;
+            border: 1px solid rgba(255,255,255,0.2);
+            letter-spacing: 0.5px;
+        }}
+        
+        .apply-btn:hover {{
+            transform: translateY(-2px);
+            box-shadow: 0 15px 35px -10px rgba(14, 165, 233, 0.7);
+            filter: brightness(1.1);
         }}
 
-        .modal-text-content {{
-            font-size: 0.95rem;
-            color: #cbd5e1 !important;
-            margin-bottom: 15px;
-        }}
-
-        /* Mobile Bottom Sheet Animation */
+        /* Mobile Adjustments */
         @media (max-width: 768px) {{
             .modal-overlay {{
-                align-items: flex-end; /* Align to bottom */
+                align-items: flex-end;
             }}
-            
             .modal-content {{
                 width: 100%;
                 max-width: 100%;
-                border-radius: 24px 24px 0 0; /* Rounded top only */
+                border-radius: 30px 30px 0 0;
                 max-height: 85vh;
-                transform: translateY(100%); /* Start off-screen */
-                transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+                transform: translateY(100%);
             }}
-            
             .modal-overlay:target .modal-content {{
-                transform: translateY(0); /* Slide up */
+                transform: translateY(0);
+            }}
+            .modal-details-grid {{
+                grid-template-columns: 1fr;
+                gap: 0;
+            }}
+            .modal-header, .modal-body, .modal-footer {{
+                padding: 25px;
+            }}
+            .modal-title {{
+                font-size: 1.5rem;
             }}
         }}
 
@@ -774,7 +844,7 @@ def get_card_image_source(row):
         
     return "https://via.placeholder.com/300x180?text=Image+Not+Found"
 
-def get_card_html(row):
+def get_card_html(row, layout="horizontal"):
     # Get the image source (Base64 or URL)
     image_src = get_card_image_source(row)
     
@@ -802,41 +872,41 @@ def get_card_html(row):
         # Fallback for plain text
         benefits_html = f'<li class="modal-benefit-item"><span class="benefit-icon">✨</span>{row.get("other_key_benefits", "No details available")}</li>'
 
+    # --- HELPER: Safe Field Formatter ---
+    def safe_fmt(label, val, icon="🔹"):
+        if not val: return ""
+        s = str(val).strip()
+        if s.lower() in ["not mentioned", "none", "nan", "n/a", "", "0", "-"]: return ""
+        return f"""<div class="modal-section-title"><span>{icon}</span> {label}</div><div class="modal-text-content">{s}</div>"""
+
+    # --- HELPER: Dynamic Grid Creator ---
+    def create_dynamic_grid(items):
+        # items = [(label, val, icon), ...]
+        valid_htmls = []
+        for label, val, icon in items:
+            html = safe_fmt(label, val, icon)
+            if html.strip():
+                valid_htmls.append(html)
+        
+        if not valid_htmls: return ""
+        
+        left_col = []
+        right_col = []
+        for i, h in enumerate(valid_htmls):
+            if i % 2 == 0: left_col.append(h)
+            else: right_col.append(h)
+            
+        return f"""<div class="modal-details-grid"><div class="modal-col">{''.join(left_col)}</div><div class="modal-col">{''.join(right_col)}</div></div>"""
+
+    if layout == "vertical":
+        # Vertical Trigger (Mini Card Style)
+        trigger_html = f"""<a href="#modal-{row['id']}" class="card-link" style="text-decoration: none; color: inherit; display: block; height: 100%;"><div class="mini-card"><div class="mini-card-img-container"><img src="{image_src}" alt="{row['card_name']}"></div><h4>{row['card_name']}</h4><p style="margin-top: 5px; color: #94a3b8; font-size: 0.8rem;">{row['bank_name']}</p></div></a>"""
+    else:
+        # Horizontal Trigger (Glass Card Style - Default)
+        trigger_html = f"""<a href="#modal-{row['id']}" class="card-link" style="text-decoration: none; color: inherit; display: block;"><div class="glass-card"><div class="card-content"><div class="card-image-container"><img src="{image_src}" class="card-img" alt="{row['card_name']}"></div><div class="card-details"><div class="card-header"><p class="card-bank">{row['bank_name']}</p><h4 class="card-title">{row['card_name']}</h4></div><div class="stats-grid"><div class="stat-item"><span class="stat-label">Fee</span><span class="stat-value">{fmt(row['annual_fee'])}</span></div><div class="stat-item"><span class="stat-label">Min Salary</span><span class="stat-value">{fmt(row['minimum_salary_requirement'])}</span></div></div><div class="card-benefits"><span class="benefit-tag">✨ {str(row['welcome_bonus'])[:30]}...</span><span class="benefit-tag">💰 {str(row['cashback_rates'])[:30]}...</span></div></div></div></div></a>"""
+
     html = f"""
-<!-- Card Trigger -->
-<a href="#modal-{row['id']}" class="card-link" style="text-decoration: none; color: inherit; display: block;">
-<div class="glass-card">
-<div class="card-content">
-<div class="card-image-container">
-<img src="{image_src}" class="card-img" alt="{row['card_name']}">
-</div>
-<div class="card-details">
-<div class="card-header">
-<p class="card-bank">{row['bank_name']}</p>
-<h4 class="card-title">{row['card_name']}</h4>
-</div>
-<div class="stats-grid">
-<div class="stat-item">
-<span class="stat-label">Fee</span>
-<span class="stat-value">{fmt(row['annual_fee'])}</span>
-</div>
-<div class="stat-item">
-<span class="stat-label">Min Salary</span>
-<span class="stat-value">{fmt(row['minimum_salary_requirement'])}</span>
-</div>
-</div>
-<div class="card-benefits">
-<span class="benefit-tag">✨ {str(row['welcome_bonus'])[:30]}...</span>
-<span class="benefit-tag">💰 {str(row['cashback_rates'])[:30]}...</span>
-</div>
-<!-- Mobile Only Hint -->
-<div class="mobile-actions" style="display:none; color: #0056b3; font-size: 0.8rem; margin-top: 5px;">
-Tap for details 👆
-</div>
-</div>
-</div>
-</div>
-</a>
+{trigger_html}
 
 <!-- Glass Sheet Modal -->
 <div id="modal-{row['id']}" class="modal-overlay">
@@ -851,7 +921,8 @@ Tap for details 👆
 </div>
 
 <div class="modal-body">
-<!-- Key Stats Grid -->
+<div class="modal-body">
+<!-- 1. Key Stats Grid -->
 <div class="modal-grid">
 <div class="modal-stat-box">
 <span class="modal-stat-label">Annual Fee</span>
@@ -862,59 +933,86 @@ Tap for details 👆
 <span class="modal-stat-value">{fmt(row['minimum_salary_requirement'])}</span>
 </div>
 <div class="modal-stat-box">
-<span class="modal-stat-label">Min Spend</span>
-<span class="modal-stat-value">{fmt(row.get('minimum_spend'))}</span>
+<span class="modal-stat-label">Travel Miles</span>
+<span class="modal-stat-value">{'Yes' if row.get('travel_points_summary') and str(row.get('travel_points_summary')).lower() not in ['none', 'nan', '', 'not mentioned', '---'] else 'No'}</span>
 </div>
 <div class="modal-stat-box">
-<span class="modal-stat-label">Foreign Fee</span>
-<span class="modal-stat-value">{fmt(row.get('foreign_currency_fee'))}</span>
+<span class="modal-stat-label">Cashback</span>
+<span class="modal-stat-value">{'Yes' if (row.get('cashback_summary') and str(row.get('cashback_summary')).lower() not in ['none', 'nan', '', 'not mentioned', '---']) or (row.get('cashback_rates') and str(row.get('cashback_rates')).lower() not in ['none', 'nan', '', 'not mentioned', '---']) else 'No'}</span>
 </div>
 </div>
 
-<!-- Text Content -->
-<div class="modal-section-title">
-<span>🏆</span> Welcome Bonus
+<!-- 2. AI Powerful Shoutout -->
+<div class="modal-section-title" style="margin-top: 5px;">
+<span>🚀</span> Why this card is special?
 </div>
-<div class="modal-text-content">
-{fmt(row['welcome_bonus'])}
-</div>
-
-<div class="modal-section-title">
-<span>💳</span> Cashback & Rewards
-</div>
-<div class="modal-text-content">
-{fmt(row.get('cashback_summary'))}
+<div class="modal-text-content" style="border-left: 3px solid #06b6d4; background: rgba(6, 182, 212, 0.1);">
+{row.get('ai_summary', 'Generating summary... (Please refresh in a moment)')}
 </div>
 
-<div class="modal-section-title">
-<span>✈️</span> Travel Benefits
-</div>
-<div class="modal-text-content">
-{fmt(row.get('travel_points_summary'))}
-</div>
+<!-- 3. More Details (Buckets) -->
+<details style="margin-top: 20px; border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; overflow: hidden;">
+<summary style="padding: 15px; background: rgba(255,255,255,0.05); cursor: pointer; font-weight: 700; color: #fff; list-style: none; display: flex; align-items: center; justify-content: center;">
+Tap for All Details / Benefits ⬇️
+</summary>
+<div style="padding: 20px;">
 
-<!-- Key Benefits List -->
-<div class="modal-section-title">
-<span>✨</span> Other Perkes (Lounge, Dining, etc.)
-</div>
+<!-- Bucket 1: Financial & Eligibility -->
+<h5 style="color: #38bdf8; margin-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 5px;">1. Financial & Eligibility</h5>
+{create_dynamic_grid([
+    ("Min Salary", row['minimum_salary_requirement'], "💰"),
+    ("Annual Fee", row['annual_fee'], "💳"),
+    ("FX Fee", row.get('foreign_currency_fee'), "💱"),
+    ("Balance Transfer", row.get('balance_transfer_eligibility'), "🔄")
+])}
+
+<!-- Bucket 2: Rewards & Earnings -->
+<h5 style="color: #38bdf8; margin: 25px 0 15px 0; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 5px;">2. Rewards & Earnings</h5>
+{create_dynamic_grid([
+    ("Points Earning", row.get('points_earning_rates'), "⭐"),
+    ("Cashback Rates", row.get('cashback_rates'), "💵"),
+    ("Welcome Bonus", row['welcome_bonus'], "🎁"),
+    ("Cashback Summary", row.get('cashback_summary'), "📝")
+])}
+
+<!-- Bucket 3: Travel & Mobility -->
+<h5 style="color: #38bdf8; margin: 25px 0 15px 0; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 5px;">3. Travel & Mobility</h5>
+{create_dynamic_grid([
+    ("Lounge Access", row.get('airport_lounge_access'), "🛋️"),
+    ("Travel Insurance", row.get('travel_insurance'), "🛡️"),
+    ("Airport Transfers", row.get('airport_transfers'), "🚕"),
+    ("Hotel Discounts", row.get('hotel_discounts'), "🏨")
+])}
+
+<!-- Bucket 4: Lifestyle & Discounts -->
+<h5 style="color: #38bdf8; margin: 25px 0 15px 0; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 5px;">4. Lifestyle & Discounts</h5>
+{create_dynamic_grid([
+    ("Dining Offers", row.get('dining_discounts'), "🍽️"),
+    ("Cinema Offers", row.get('cinema_offers'), "🎬"),
+    ("Golf Privileges", row.get('golf_privileges'), "⛳"),
+    ("Valet Parking", row.get('valet_parking'), "🚗")
+])}
+
+<!-- Bucket 5: Security & Protection -->
+<h5 style="color: #38bdf8; margin: 25px 0 15px 0; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 5px;">5. Security & Protection</h5>
+{safe_fmt("Purchase Protection", row.get('purchase_protection'), "🛍️")}
+{safe_fmt("Extended Warranty", row.get('extended_warranty'), "🔧")}
+
+<!-- Bucket 6: Other Benefits -->
+<h5 style="color: #38bdf8; margin: 25px 0 15px 0; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 5px;">6. Other Benefits</h5>
 <ul class="modal-benefits-list">
 {benefits_html}
 </ul>
+
+</div>
+</details>
+
 </div>
 
-<div class="modal-footer">
-<a href="#" style="
-display: block; 
-width: 100%; 
-padding: 15px; 
-background: linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%); 
-color: white; 
-text-align: center; 
-text-decoration: none; 
-font-weight: 700; 
-border-radius: 12px;
-box-shadow: 0 4px 15px rgba(6, 182, 212, 0.4);
-">Apply Now / View Details</a>
+<div class="modal-footer" style="display: flex; gap: 15px;">
+<a href="{row['url']}" target="_blank" class="apply-btn" style="flex: 1; background: linear-gradient(135deg, #059669 0%, #10b981 100%); box-shadow: 0 10px 30px -10px rgba(16, 185, 129, 0.6);">
+Apply Now 🚀
+</a>
 </div>
 </div>
 </div>

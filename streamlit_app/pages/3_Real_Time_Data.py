@@ -35,7 +35,7 @@ def get_mini_card_html(row):
     """
 
 # --- DATA LOADING ---
-@st.cache_data
+@st.cache_data(ttl=60)
 def load_data():
     try:
         conn = get_db_connection()
@@ -133,7 +133,7 @@ with c1:
             cols = st.columns(3) # Show in a grid of 3
             for idx, (i, row) in enumerate(filtered_cards.head(6).iterrows()):
                 with cols[idx % 3]:
-                    st.markdown(get_mini_card_html(row), unsafe_allow_html=True)
+                    st.markdown(get_card_html(row, layout="vertical"), unsafe_allow_html=True)
         else:
             st.info("No cards found.")
 
@@ -206,7 +206,7 @@ with c2:
             cols = st.columns(3)
             for idx, (i, row) in enumerate(filtered_cb_cards.head(6).iterrows()):
                 with cols[idx % 3]:
-                    st.markdown(get_mini_card_html(row), unsafe_allow_html=True)
+                    st.markdown(get_card_html(row, layout="vertical"), unsafe_allow_html=True)
         else:
             st.info("No cards found.")
 
@@ -254,14 +254,12 @@ if event_bank and len(event_bank.selection["points"]) > 0:
     filtered_bank_cards = df[df['bank_name'] == selected_bank]
         
     if not filtered_bank_cards.empty:
-        cols = st.columns(6) # Show up to 6 in a single row if possible, or grid
-        # Adjust grid based on count
-        num_cards = min(len(filtered_bank_cards), 6)
-        cols = st.columns(num_cards)
+        # Use a fixed grid of 3 for consistency with other sections, enabling multiline if more than 3
+        cols = st.columns(3)
         
-        for idx, (i, row) in enumerate(filtered_bank_cards.head(num_cards).iterrows()):
-            with cols[idx]:
-                st.markdown(get_mini_card_html(row), unsafe_allow_html=True)
+        for idx, (i, row) in enumerate(filtered_bank_cards.head(6).iterrows()): # Limit to 6
+            with cols[idx % 3]:
+                st.markdown(get_card_html(row, layout="vertical"), unsafe_allow_html=True)
     else:
         st.info("No cards found.")
 
