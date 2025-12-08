@@ -474,273 +474,209 @@ def load_css():
             pointer-events: none !important;
         }}
 
-        /* --- GLASS SHEET MODAL (PREMIUM) --- */
-        .modal-overlay {
+        /* --- GLASS SHEET MODAL (CSS ONLY) --- */
+        .modal-overlay {{
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.7);
-            backdrop-filter: blur(8px);
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(4px);
             z-index: 9999;
             opacity: 0;
-            display: none;
+            display: none; /* Changed from visibility: hidden to display: none */
             transition: opacity 0.3s ease;
             align-items: center;
             justify-content: center;
-        }
+        }}
 
-        .modal-overlay:target {
+        /* Show modal when target is active */
+        .modal-overlay:target {{
             opacity: 1;
-            display: flex;
-        }
+            display: flex; /* Show when targeted */
+        }}
 
-        .modal-content {
-            background: rgba(15, 23, 42, 0.8);
-            backdrop-filter: blur(24px) saturate(180%);
-            -webkit-backdrop-filter: blur(24px) saturate(180%);
-            border-radius: 24px;
-            width: 95%;
-            max-width: 800px;
-            max-height: 90vh;
+        .modal-content {{
+            background: rgba(30, 41, 59, 0.95); /* Dark Slate */
+            backdrop-filter: blur(15px);
+            border-radius: 20px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 85vh;
             overflow-y: auto;
             position: relative;
-            box-shadow: 0 50px 100px -20px rgba(0, 0, 0, 0.7), inset 0 0 0 1px rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            transform: scale(0.96);
-            transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transform: scale(0.95);
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
             display: flex;
             flex-direction: column;
-        }
+        }}
 
-        .modal-overlay:target .modal-content {
+        .modal-overlay:target .modal-content {{
             transform: scale(1);
-        }
+        }}
 
-        .modal-close {
+        .modal-close {{
             position: absolute;
-            top: 20px;
-            right: 20px;
-            background: rgba(255, 255, 255, 0.05);
+            top: 15px;
+            right: 15px;
+            background: rgba(255, 255, 255, 0.1);
             border-radius: 50%;
-            width: 36px;
-            height: 36px;
+            width: 32px;
+            height: 32px;
             display: flex;
             align-items: center;
             justify-content: center;
             text-decoration: none;
-            color: #cbd5e1;
-            font-size: 1.5rem;
-            z-index: 20;
-            transition: all 0.2s;
-            border: 1px solid rgba(255,255,255,0.05);
-        }
+            color: #f8fafc;
+            font-weight: bold;
+            font-size: 1.2rem;
+            z-index: 10;
+            transition: background 0.2s;
+        }}
         
-        .modal-close:hover {
-            background: rgba(255, 255, 255, 0.15);
-            color: white;
-            transform: rotate(90deg);
-        }
+        .modal-close:hover {{
+            background: rgba(0, 0, 0, 0.1);
+        }}
 
-        /* Modal Header */
-        .modal-header {
-            padding: 40px 40px 20px 40px;
+        .modal-header {{
+            padding: 25px 25px 15px 25px;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
             text-align: center;
-            background: linear-gradient(to bottom, rgba(255,255,255,0.02), transparent);
-        }
+        }}
         
-        .modal-img-container {
-            height: 160px;
+        .modal-img-container {{
+            height: 140px;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-bottom: 20px;
-            filter: drop-shadow(0 20px 40px rgba(0,0,0,0.3));
-            transition: transform 0.3s;
-        }
+            margin-bottom: 15px;
+        }}
         
-        .modal-img-container:hover {
-            transform: scale(1.05);
-        }
-        
-        .modal-img {
+        .modal-img {{
             max-height: 100%;
             max-width: 100%;
             object-fit: contain;
-        }
+            filter: drop-shadow(0 8px 16px rgba(0,0,0,0.15));
+        }}
 
-        .modal-title {
-            font-size: 2rem;
+        .modal-title {{
+            font-size: 1.5rem;
             font-weight: 800;
             color: #f8fafc !important;
             margin: 0;
-            line-height: 1.1;
-            letter-spacing: -0.02em;
-            background: linear-gradient(135deg, #fff 0%, #cbd5e1 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
+            line-height: 1.2;
+        }}
         
-        .modal-bank {
+        .modal-bank {{
             font-size: 0.9rem;
-            color: #94a3b8 !important;
+            color: #cbd5e1 !important;
             text-transform: uppercase;
-            letter-spacing: 2px;
-            margin-top: 8px;
-            font-weight: 600;
-        }
+            letter-spacing: 1px;
+            margin-top: 5px;
+        }}
 
-        /* Modal Body */
-        .modal-body {
-            padding: 30px 40px;
+        .modal-body {{
+            padding: 25px;
             flex: 1;
-        }
+        }}
 
-        /* Key Stats Grid - Sleek Cards */
-        .modal-grid {
+        .modal-grid {{
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+            grid-template-columns: 1fr 1fr;
             gap: 15px;
-            margin-bottom: 40px;
-        }
+            margin-bottom: 25px;
+        }}
         
-        .modal-stat-box {
-            background: rgba(255,255,255,0.03);
-            border: 1px solid rgba(255,255,255,0.08);
-            border-radius: 16px;
-            padding: 16px;
+        .modal-stat-box {{
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            padding: 12px;
             text-align: center;
-            transition: background 0.2s, transform 0.2s;
-        }
+        }}
         
-        .modal-stat-box:hover {
-            background: rgba(255,255,255,0.06);
-            transform: translateY(-2px);
-            border-color: rgba(255,255,255,0.15);
-        }
-        
-        .modal-stat-label {
-            font-size: 0.75rem;
+        .modal-stat-label {{
+            font-size: 0.7rem;
             color: #94a3b8 !important;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
             display: block;
-            margin-bottom: 6px;
-            font-weight: 600;
-        }
+            margin-bottom: 4px;
+        }}
         
-        .modal-stat-value {
+        .modal-stat-value {{
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: #f8fafc !important;
+        }}
+
+        .modal-section-title {{
             font-size: 1rem;
             font-weight: 700;
-            color: #f1f5f9 !important;
-        }
-
-        /* Sections */
-        .modal-section-title {
-            font-size: 1.1rem;
-            font-weight: 700;
-            margin: 30px 0 15px 0;
+            margin: 20px 0 10px 0;
             color: #e2e8f0 !important;
             display: flex;
             align-items: center;
-            gap: 10px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid rgba(255,255,255,0.08);
-        }
-        
-        .modal-text-content {
-            font-size: 1rem;
-            color: #cbd5e1 !important;
-            line-height: 1.6;
-            background: rgba(255,255,255,0.02);
-            padding: 15px;
-            border-radius: 12px;
-            border: 1px solid rgba(255,255,255,0.05);
-        }
+            gap: 8px;
+        }}
 
-        /* Two Column Layout for Details */
-        .modal-details-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 30px;
-        }
+        .modal-benefits-list {{
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }}
         
-        .modal-benefit-item {
+        .modal-benefit-item {{
             padding: 8px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
             font-size: 0.95rem;
             color: #cbd5e1 !important;
             display: flex;
-            align-items: flex-start;
-            gap: 12px;
-        }
+            gap: 10px;
+        }}
         
-        .benefit-icon {
-            color: #38bdf8; /* Sky Blue */
-            font-size: 1.1rem;
-            margin-top: -2px;
-        }
+        .modal-benefit-item:last-child {{
+            border-bottom: none;
+        }}
 
-        /* Footer */
-        .modal-footer {
-            padding: 25px 40px;
-            background: rgba(15, 23, 42, 0.8);
-            border-top: 1px solid rgba(255,255,255,0.08);
+        .modal-footer {{
+            padding: 20px;
+            background: rgba(30, 41, 59, 0.9);
+            border-top: 1px solid rgba(255,255,255,0.1);
             position: sticky;
             bottom: 0;
-            backdrop-filter: blur(20px);
-            z-index: 10;
-        }
-        
-        .apply-btn {
-            display: block; 
-            width: 100%; 
-            padding: 16px; 
-            background: linear-gradient(135deg, #0ea5e9 0%, #6366f1 100%); 
-            color: white !important; 
-            text-align: center; 
-            text-decoration: none; 
-            font-weight: 700; 
-            font-size: 1.1rem;
-            border-radius: 16px;
-            box-shadow: 0 10px 30px -10px rgba(14, 165, 233, 0.6);
-            transition: all 0.3s;
-            border: 1px solid rgba(255,255,255,0.2);
-            letter-spacing: 0.5px;
-        }
-        
-        .apply-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 15px 35px -10px rgba(14, 165, 233, 0.7);
-            filter: brightness(1.1);
-        }
+            backdrop-filter: blur(10px);
+        }}
 
-        /* Mobile Adjustments */
+        .modal-text-content {{
+            font-size: 0.95rem;
+            color: #cbd5e1 !important;
+            margin-bottom: 15px;
+        }}
+
+        /* Mobile Bottom Sheet Animation */
         @media (max-width: 768px) {{
             .modal-overlay {{
-                align-items: flex-end;
+                align-items: flex-end; /* Align to bottom */
             }}
+            
             .modal-content {{
                 width: 100%;
                 max-width: 100%;
-                border-radius: 30px 30px 0 0;
+                border-radius: 24px 24px 0 0; /* Rounded top only */
                 max-height: 85vh;
-                transform: translateY(100%);
+                transform: translateY(100%); /* Start off-screen */
+                transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
             }}
+            
             .modal-overlay:target .modal-content {{
-                transform: translateY(0);
-            }}
-            .modal-details-grid {{
-                grid-template-columns: 1fr;
-                gap: 0;
-            }}
-            .modal-header, .modal-body, .modal-footer {{
-                padding: 25px;
-            }}
-            .modal-title {{
-                font-size: 1.5rem;
+                transform: translateY(0); /* Slide up */
             }}
         }}
+
+    </style>
     """, unsafe_allow_html=True)
 
 def parse_salary(salary_str):
@@ -866,20 +802,6 @@ def get_card_html(row):
         # Fallback for plain text
         benefits_html = f'<li class="modal-benefit-item"><span class="benefit-icon">✨</span>{row.get("other_key_benefits", "No details available")}</li>'
 
-    # --- HELPER: Safe Field Formatter ---
-    def safe_fmt(label, val, icon="🔹"):
-        if not val: return ""
-        s = str(val).strip()
-        if s.lower() in ["not mentioned", "none", "nan", "n/a", "", "0", "-"]: return ""
-        return f"""
-        <div class="modal-section-title">
-            <span>{icon}</span> {label}
-        </div>
-        <div class="modal-text-content">
-            {s}
-        </div>
-        """
-
     html = f"""
 <!-- Card Trigger -->
 <a href="#modal-{row['id']}" class="card-link" style="text-decoration: none; color: inherit; display: block;">
@@ -907,6 +829,10 @@ def get_card_html(row):
 <span class="benefit-tag">✨ {str(row['welcome_bonus'])[:30]}...</span>
 <span class="benefit-tag">💰 {str(row['cashback_rates'])[:30]}...</span>
 </div>
+<!-- Mobile Only Hint -->
+<div class="mobile-actions" style="display:none; color: #0056b3; font-size: 0.8rem; margin-top: 5px;">
+Tap for details 👆
+</div>
 </div>
 </div>
 </div>
@@ -925,7 +851,7 @@ def get_card_html(row):
 </div>
 
 <div class="modal-body">
-<!-- 1. Key Stats Grid -->
+<!-- Key Stats Grid -->
 <div class="modal-grid">
 <div class="modal-stat-box">
 <span class="modal-stat-label">Annual Fee</span>
@@ -940,39 +866,36 @@ def get_card_html(row):
 <span class="modal-stat-value">{fmt(row.get('minimum_spend'))}</span>
 </div>
 <div class="modal-stat-box">
-<span class="modal-stat-label">FX Fee</span>
+<span class="modal-stat-label">Foreign Fee</span>
 <span class="modal-stat-value">{fmt(row.get('foreign_currency_fee'))}</span>
 </div>
 </div>
 
-<!-- 2. Two-Column Layout for Rich Data -->
-<div class="modal-details-grid">
-
-<!-- Left Column: Core Benefits -->
-<div class="modal-col">
-{safe_fmt("Welcome Bonus", row['welcome_bonus'], "🏆")}
-{safe_fmt("Cashback & Rewards", row.get('cashback_summary'), "💳")}
-{safe_fmt("Points & Miles", row.get('travel_points_summary'), "✈️")}
-</div>
-
-<!-- Right Column: Lifestyle & Perks -->
-<div class="modal-col">
-{safe_fmt("Lounge Access", row.get('airport_lounge_access'), "🛋️")}
-{safe_fmt("Dining Offers", row.get('dining_discounts'), "🍽️")}
-{safe_fmt("Cinema Offers", row.get('cinema_offers'), "🎬")}
-{safe_fmt("Golf Privileges", row.get('golf_privileges'), "⛳")}
-{safe_fmt("Valet Parking", row.get('valet_parking'), "🚗")}
-</div>
-</div>
-
-<!-- 3. Full Width Sections (Protection/Travel) -->
-{safe_fmt("Travel Insurance", row.get('travel_insurance'), "🛡️")}
-{safe_fmt("Airport Transfers", row.get('airport_transfers'), "🚕")}
-{safe_fmt("Purchase Protection", row.get('purchase_protection'), "🛍️")}
-
-<!-- 4. Other Benefits List -->
+<!-- Text Content -->
 <div class="modal-section-title">
-<span>✨</span> Additional Perks
+<span>🏆</span> Welcome Bonus
+</div>
+<div class="modal-text-content">
+{fmt(row['welcome_bonus'])}
+</div>
+
+<div class="modal-section-title">
+<span>💳</span> Cashback & Rewards
+</div>
+<div class="modal-text-content">
+{fmt(row.get('cashback_summary'))}
+</div>
+
+<div class="modal-section-title">
+<span>✈️</span> Travel Benefits
+</div>
+<div class="modal-text-content">
+{fmt(row.get('travel_points_summary'))}
+</div>
+
+<!-- Key Benefits List -->
+<div class="modal-section-title">
+<span>✨</span> Other Perkes (Lounge, Dining, etc.)
 </div>
 <ul class="modal-benefits-list">
 {benefits_html}
@@ -980,7 +903,18 @@ def get_card_html(row):
 </div>
 
 <div class="modal-footer">
-<a href="#" class="apply-btn">Apply Now / View Details</a>
+<a href="#" style="
+display: block; 
+width: 100%; 
+padding: 15px; 
+background: linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%); 
+color: white; 
+text-align: center; 
+text-decoration: none; 
+font-weight: 700; 
+border-radius: 12px;
+box-shadow: 0 4px 15px rgba(6, 182, 212, 0.4);
+">Apply Now / View Details</a>
 </div>
 </div>
 </div>
