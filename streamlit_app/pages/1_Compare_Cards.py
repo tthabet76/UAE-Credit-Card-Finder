@@ -335,109 +335,61 @@ if st.session_state.get("show_comparison", False):
 
 # --- FLOATING ACTION BAR ---
 # --- FLOATING ACTION BAR (Native Streamlit Button) ---
+# --- FLOATING ACTION BAR (Native Streamlit Button + CSS) ---
 if st.session_state.selected_cards:
     count = len(st.session_state.selected_cards)
     
-    # CSS to style the button as a floating bar
+    # CSS to force the "Compare" button to float at the bottom
     st.markdown("""
     <style>
-        div.stButton > button:first-child {
-            display: block;
-        }
-        /* Target the specific button by key if possible, but simpler to style all primary buttons in this container context */
-        /* OR use a container and style that. */
-        
-        .floating-container {
-            position: fixed;
-            bottom: 30px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 999999;
-            background: rgba(15, 23, 42, 0.95);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            border-radius: 50px;
-            padding: 8px 15px; /* Compact padding */
-            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
-            display: flex;
-            align-items: center;
-            gap: 15px;
+        /* Target the Primary Button to make it Floating */
+        div[data-testid="stButton"] button[kind="primary"] {
+            position: fixed !important;
+            bottom: 40px !important;
+            left: 50% !important;
+            transform: translateX(-50%) !important;
+            z-index: 999999 !important;
+            
+            /* Visual Styling */
+            background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%) !important;
+            color: white !important;
+            border: 1px solid rgba(255, 255, 255, 0.2) !important;
+            border-radius: 50px !important;
+            padding: 12px 30px !important;
+            font-weight: 700 !important;
+            font-size: 1.1rem !important;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.6) !important;
+            width: auto !important;
+            transition: transform 0.2s ease !important;
         }
         
-        div.floating-count {
-            color: #f8fafc;
-            font-weight: 600;
-            margin-right: 10px;
+        div[data-testid="stButton"] button[kind="primary"]:hover {
+            transform: translateX(-50%) translateY(-5px) !important;
+            box-shadow: 0 25px 50px rgba(59, 130, 246, 0.6) !important;
         }
         
+        /* Optional: Add a backdrop/container visual if needed, but the button itself is enough */
     </style>
     """, unsafe_allow_html=True)
 
-    # Use a container to group the layout
-    with st.container():
-        # Using columns to center or layout is hard for fixed pos.
-        # We will render the HTML container WRAPPER, and put the button inside? 
-        # No, Streamlit widgets are hard to embed in HTML.
+    # Render Buttons
+    # We use columns to layout the "Clear" button differently if needed, 
+    # but let's focus on the Primary Compare button floating.
+    
+    # "Compare" Button (Primary -> Floats)
+    if st.button(f"🚀 Compare {count} Cards Now", type="primary", key="btn_compare_floating"):
+        show_comparison_dialog()
         
-        # New Strategy: Render the Button NORMALLY, but use CSS to move it.
-        # We need to give it a unique key/class.
-        pass
-
-    # Alternative: Use standard columns at the bottom or sidebar.
-    # But user wants floating.
+    # "Clear" Button (Secondary -> Sidebar or Small below?)
+    # Let's keep Clear in sidebar for safety, or add a small secondary one here?
+    # If we add another button here, it won't be fixed unless we target it too.
+    # Let's keep "Clear" in the sidebar to keep the UI clean.
     
-    # Let's try the CSS injection for a specific button.
-    # We create a button, and wrap it in a div that we target?
-    # Streamlit doesn't support wrapping widgets easily.
-    
-    # Simple fix: Put the button in the SIDEBAR for now as a "Safe" option, 
-    # AND keep the floating bar essentially as a visual indicator?
-    
-    # Actually, the user wants the previous behavior.
-    # The fix is to use st.query_params with `st.rerun()` manually instead of href?
-    # No, we can't trigger rerun from JS.
-    
-    # OK, I will replace the Href with a sidebar button for robustness.
-    pass
-
-# FLOATING BAR REPLACEMENT
-if st.session_state.selected_cards:
-    count = len(st.session_state.selected_cards)
-    
-    # Fixed Bottom Container using st.columns in a container that we style?
-    # No, Streamlit allows `st.container` but not fixed pos.
-    
-    # Let's try CSS styling a button to be fixed.
-    st.markdown("""
-    <style>
-    div[data-testid="stButton"] button {
-        /* This applies to ALL buttons, dangerous */
-    }
-    
-    /* Target the specific key */
-    </style>
-    """, unsafe_allow_html=True)
-    
-    # SAFE APPROACH: Use the Sidebar.
     st.sidebar.markdown("---")
     st.sidebar.markdown(f"### Selected: {count}")
-    if st.sidebar.button("🚀 COMPARE NOW", type="primary", use_container_width=True):
-        show_comparison_dialog()
-    
-    if st.sidebar.button("Clear Selection"):
+    if st.sidebar.button("Clear Selection", key="sidebar_clear"):
         clear_all_selections()
         st.rerun()
-
-    # Still render the Floating Bar VISUALLY (but disable link?) or make the link a #?
-    # The user LIKED the floating bar.
-    # I will modify the floating bar URL to avoid reload? No.
-    
-    # I will REMOVE the floating bar logic that relies on URL reloads and use Sidebar.
-    # Or I can try to make the Floating Bar purely informational?
-    # "Use Sidebar to Compare"
-    
-    # Wait, I will Implement the CSS Button Hack. It's the only way to keep the UI the same.
-    # I will create a container at the bottom.
 
 # Pagination Logic
 if 'page_number' not in st.session_state:
