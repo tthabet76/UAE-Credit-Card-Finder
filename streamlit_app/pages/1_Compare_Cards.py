@@ -7,6 +7,10 @@ from db_utils import fetch_all_cards
 load_css()
 st.title("Compare Credit Cards")
 
+# Initialize Session State Early
+if 'selected_cards' not in st.session_state:
+    st.session_state.selected_cards = []
+
 # 1.1 Query Parameter Logic (Triggered by Floating Bar)
 if "action" in st.query_params:
     action = st.query_params["action"]
@@ -249,17 +253,19 @@ if 'selected_cards' not in st.session_state:
 
 def toggle_selection(card_id):
     """Callback to handle selection logic and sync checkbox state"""
+    card_id = str(card_id) # Enforce string type
     key = f"select_{card_id}"
     is_checked = st.session_state.get(key, False)
     
     if is_checked:
-        if len(st.session_state.selected_cards) >= 3:
-            # FIFO: Remove the first selected card
-            removed_id = st.session_state.selected_cards.pop(0)
-            # Uncheck the removed card's widget
-            st.session_state[f"select_{removed_id}"] = False
-            
         if card_id not in st.session_state.selected_cards:
+            # Check Max 3 *before* adding
+            if len(st.session_state.selected_cards) >= 3:
+                # FIFO: Remove the first selected card
+                removed_id = st.session_state.selected_cards.pop(0)
+                # Uncheck the removed card's widget
+                st.session_state[f"select_{removed_id}"] = False
+            
             st.session_state.selected_cards.append(card_id)
     else:
         if card_id in st.session_state.selected_cards:
@@ -284,7 +290,8 @@ def show_comparison_dialog():
         return
 
     selected_ids = st.session_state.selected_cards
-    comparison_df = df[df['id'].isin(selected_ids)]
+    # Ensure IDs match types (convert DF ID to string to match selected_cards)
+    comparison_df = df[df['id'].astype(str).isin(selected_ids)]
     
     if comparison_df.empty:
         st.error("Error loading selected cards.")
@@ -457,13 +464,14 @@ for idx, row in paginated_df.iterrows():
             st.write("") 
             st.write("")
             
-            is_selected = row['id'] in st.session_state.selected_cards
+            card_id_str = str(row['id'])
+            is_selected = card_id_str in st.session_state.selected_cards
             st.checkbox(
                 "Compare", 
-                key=f"select_{row['id']}", 
+                key=f"select_{card_id_str}", 
                 value=is_selected,
                 on_change=toggle_selection,
-                args=(row['id'],)
+                args=(card_id_str,)
             )
             
     except Exception as e:
