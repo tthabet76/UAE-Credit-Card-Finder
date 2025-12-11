@@ -3,6 +3,7 @@ import os
 import base64
 import json
 import re
+from db_utils import get_supabase_client, SUPABASE_ENABLED
 
 def load_css():
     # Initialize theme in session state if not present
@@ -781,10 +782,23 @@ import sqlite3
 @st.cache_data(ttl=3600)
 def get_card_image_from_db(card_id):
     """
-    Fetches image source from the database (Cached).
-    Prioritizes scraper_image_url, then local_filename.
-    Returns None if not found.
+    Fetches image source.
+    If SUPABASE_ENABLED: Returns the public 'image_url' from Cloud.
+    If LOCAL: Returns local_filename or scraper_url from SQLite.
     """
+    if SUPABASE_ENABLED:
+        try:
+            client = get_supabase_client()
+            if client:
+                # Optimized: Select 'image_url'
+                resp = client.table("card_images").select("image_url").eq("card_id", card_id).execute()
+                if resp.data and resp.data[0].get('image_url'):
+                    return resp.data[0]['image_url']
+        except Exception as e:
+            # print(f"Supabase Img Error: {e}")
+            pass
+            
+    # Fallback / Local Mode
     db_path = os.path.join(os.path.dirname(__file__), '..', 'credit_card_data.db')
     try:
         conn = sqlite3.connect(db_path)

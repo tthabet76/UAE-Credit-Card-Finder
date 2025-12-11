@@ -1,0 +1,4 @@
+ALTER TABLE public.card_images ADD COLUMN IF NOT EXISTS card_url TEXT;
+ALTER TABLE public.card_images ADD COLUMN IF NOT EXISTS manual_image_url TEXT;
+ALTER TABLE public.card_images ADD COLUMN IF NOT EXISTS manual_date TIMESTAMP WITH TIME ZONE;
+ALTER TABLE public.card_images ADD COLUMN IF NOT EXISTS scraper_date TIMESTAMP WITH TIME ZONE;

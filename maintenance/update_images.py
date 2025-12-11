@@ -21,7 +21,8 @@ from dotenv import load_dotenv
 load_dotenv(override=True)
 
 chromedriver_path = 'C:/Users/cdf846/Documents/personal/Credit card project/chromedriver.exe'
-db_file = 'credit_card_data.db'
+# Point to the root database
+db_file = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'credit_card_data.db')
 
 def setup_image_table(database_file):
     """Ensures the card_images table exists."""
@@ -126,6 +127,80 @@ def extract_rakbank_image(driver, card_name):
         print(f"  Error in RAKBANK extraction: {e}")
     return None
 
+def extract_generic_image_by_content(driver, card_name):
+    """
+    Scans all images on the page and scores them based on how well
+    their alt text or filename matches the card name.
+    """
+    try:
+        # Get all images with their attributes
+        images_data = driver.execute_script("""
+            var imgs = document.getElementsByTagName("img");
+            var result = [];
+            for (var i = 0; i < imgs.length; i++) {
+                result.push({
+                    src: imgs[i].src,
+                    alt: imgs[i].alt || "",
+                    width: imgs[i].naturalWidth,
+                    height: imgs[i].naturalHeight
+                });
+            }
+            return result;
+        """)
+
+        best_candidate = None
+        best_score = 0
+        
+        card_parts = card_name.lower().split()
+        # Remove common words that might dilute the match
+        common_words = {'card', 'credit', 'bank', 'uae', 'the', 'of', 'and'}
+        keywords = [w for w in card_parts if w not in common_words]
+        
+        if not keywords:
+            keywords = card_parts
+
+        for img in images_data:
+            src = img.get('src', '')
+            alt = img.get('alt', '')
+            width = img.get('width', 0)
+            height = img.get('height', 0)
+            
+            if not src: continue
+            
+            # Skip tiny icons & tracking pixels
+            if width > 0 and width < 100: continue
+            if height > 0 and height < 100: continue
+
+            score = 0
+            
+            # Score based on Alt text (High weight)
+            for part in keywords:
+                if part in alt.lower():
+                    score += 2
+            
+            # Score based on filename (Medium weight)
+            for part in keywords:
+                if part in src.lower():
+                    score += 1
+
+            # Bonus for 'card' in src/alt if check fails
+            if 'card' in src.lower() or 'card' in alt.lower():
+                score += 0.5
+            
+            if score > best_score:
+                best_score = score
+                best_candidate = src
+        
+        # Threshold: At least one strong match required (score > 1)
+        if best_score > 1:
+            # print(f"  > Generic Best Match (Score {best_score}): {best_candidate}")
+            return best_candidate
+            
+    except Exception as e:
+        print(f"  Error in generic content extraction: {e}")
+    
+    return None
+
 def extract_image_url(driver, bank_name, current_url, card_name):
     """
     The core logic for finding the image.
@@ -140,6 +215,23 @@ def extract_image_url(driver, bank_name, current_url, card_name):
             extracted_image_url = extract_rakbank_image(driver, card_name)
             if extracted_image_url:
                 return extracted_image_url
+
+        # [SIB] - Extract background-image from div.exclusive-bg
+        if 'SIB' in bank_name or 'Sharjah Islamic' in bank_name:
+            try:
+                # Find the div with class 'exclusive-bg'
+                element = driver.find_element(By.CLASS_NAME, "exclusive-bg")
+                style = element.get_attribute("style")
+                # Extract URL from style="background-image: url('...')"
+                match = re.search(r'url\(["\']?([^"\')]+)["\']?\)', style)
+                if match:
+                    # Handle relative URLs if necessary (though user example was absolute)
+                    url = match.group(1)
+                    if url.startswith('/'):
+                        url = f"https://www.sib.ae{url}"
+                    return url
+            except Exception as e:
+                print(f"  SIB extraction failed: {e}")
 
         # --- STRATEGY 2: Generic Meta Tags (Works for 80% of sites) ---
         # Try og:image
@@ -157,6 +249,10 @@ def extract_image_url(driver, bank_name, current_url, card_name):
                 extracted_image_url = meta_tw_img[0].get_attribute('content')
                 if extracted_image_url == '[object Object]':
                     extracted_image_url = None
+
+        # --- STRATEGY 3: Generic Content Match (Smart Fallback) ---
+        if not extracted_image_url:
+            extracted_image_url = extract_generic_image_by_content(driver, card_name)
 
         # --- STRATEGY 3: Post-Processing Bank Specific Logic ---
         
