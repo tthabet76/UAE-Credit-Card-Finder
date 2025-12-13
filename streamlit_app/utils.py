@@ -33,6 +33,12 @@ def load_css():
             --pill-bg: rgba(30, 41, 59, 0.7);
             --pill-text: #f8fafc;
             --pill-active-bg: #06b6d4;
+            --input-bg: #0f172a;
+            --input-text: #ffffff;
+            --input-border: rgba(255, 255, 255, 0.2);
+            --dropdown-bg: #1e1b4b;
+            --dropdown-border: rgba(255, 255, 255, 0.1);
+            --option-text: #e2e8f0;
         }
         """
     else: # Light Theme
@@ -55,6 +61,12 @@ def load_css():
             --pill-bg: #ffffff;
             --pill-text: #1e293b;
             --pill-active-bg: #06b6d4;
+            --input-bg: #ffffff;
+            --input-text: #1e293b;
+            --input-border: #cbd5e1;
+            --dropdown-bg: #ffffff;
+            --dropdown-border: #e2e8f0;
+            --option-text: #1e293b;
         }
         """
 
@@ -153,30 +165,58 @@ def load_css():
             margin-bottom: 10px;
         }}
 
-        /* --- INPUT FIELDS FIX --- */
-        /* Force inputs to match theme */
-        input, .stTextInput input, .stNumberInput input, .stSelectbox input {{
-            color: #333333 !important;
-            caret-color: #333333 !important;
+        /* --- UNIVERSAL INPUT FIX (Dynamic Theme) --- */
+        
+        /* 1. Target the Input Wrapper (The Box Itself) */
+        div[data-baseweb="base-input"], .stTextInput div[data-baseweb="base-input"], .stTextArea div[data-baseweb="base-input"] {{
+            background-color: var(--input-bg) !important;
+            border: 1px solid var(--input-border) !important;
+            border-radius: 8px !important;
         }}
         
-        /* Fix for Selectbox dropdown text */
+        /* 2. Target the actual input text element */
+        input, textarea, select, .stTextInput input, .stTextArea textarea {{
+            color: var(--input-text) !important;
+            background-color: transparent !important; 
+            caret-color: var(--accent-primary) !important;
+        }}
+        
+        /* 3. Dropdowns (Selectbox) */
         div[data-baseweb="select"] > div {{
-            color: #333333 !important;
+            background-color: var(--input-bg) !important;
+            color: var(--input-text) !important;
+            border: 1px solid var(--input-border) !important;
         }}
         
-        /* Fix for Number Input buttons (+/-) */
+        /* 4. Dropdown Options Menu */
+        ul[data-baseweb="menu"], [role="listbox"] {{
+            background-color: var(--dropdown-bg) !important;
+            border: 1px solid var(--dropdown-border) !important;
+        }}
+        
+        li[role="option"] {{
+            color: var(--option-text) !important;
+        }}
+        
+        /* 5. Number Input Buttons */
         button[kind="secondary"] {{
-            color: #333333 !important;
-            border-color: rgba(0,0,0,0.1) !important;
+            background-color: transparent !important;
+            color: var(--input-text) !important;
+            border: none !important;
+        }}
+        button[kind="secondary"]:hover {{
+            background-color: rgba(125,125,125,0.1) !important;
         }}
         
-        /* Force SVG icons (plus/minus) to be dark */
-        button[kind="secondary"] svg,
-        button[kind="secondary"] svg path {{
-            fill: #333333 !important;
-            stroke: #333333 !important;
-            color: #333333 !important;
+        /* Fix SVG Icons */
+        button[kind="secondary"] svg, button[kind="secondary"] svg path {{
+            fill: var(--input-text) !important;
+        }}
+        
+        /* 6. Fix "Not Mentioned" or Disabled inputs */
+        input:disabled, textarea:disabled, div[data-baseweb="base-input"][disabled] {{
+            background-color: transparent !important; /* Inherit */
+            opacity: 0.6;
         }}
         .mini-card img {{
             max-width: 100%;
@@ -230,17 +270,18 @@ def load_css():
         }}
 
         .stat-label {{
-            font-size: 0.7rem;
+            font-size: 1.1rem; 
             color: var(--text-secondary);
             text-transform: uppercase;
-            font-weight: 600;
+            font-weight: 700;
             margin-bottom: 4px;
         }}
 
         .stat-value {{
-            font-size: 1.1rem;
-            font-weight: 600;
+            font-size: 1.1rem; /* Equal size */
+            font-weight: 700;
             color: var(--text-primary);
+            line-height: 1.2;
         }}
 
         /* Benefits List */
@@ -354,8 +395,9 @@ def load_css():
         .card-content {{
             display: flex;
             flex-direction: row;
-            padding: 20px;
-            gap: 25px;
+            padding: 12px; /* Reduced from 20px */
+            gap: 20px; /* Reduced from 25px */
+            align-items: center; /* Vertically Center Image */
         }}
         
         .card-image-container {{
@@ -384,7 +426,7 @@ def load_css():
         }}
         
         .card-header {{
-            margin-bottom: 10px;
+            margin-bottom: 3px; /* Reduced from 5px */
         }}
         
         .card-bank {{
@@ -396,12 +438,50 @@ def load_css():
             margin: 0;
         }}
         
-        .card-stats {{
-            display: flex;
-            gap: 30px;
-            margin-bottom: 15px;
-            padding-bottom: 15px;
-            border-bottom: 1px solid var(--card-border);
+        .card-title {{
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 4px; /* Reduced from 8px */
+            background: none;
+            line-height: 1.2;
+        }}
+        
+        .card-grid-2x2 {{
+            display: grid;
+            grid-template-columns: 1fr 1fr; /* Strict 50% split */
+            gap: 15px 25px; /* Row Gap 15px, Col Gap 25px */
+            margin-bottom: 5px;
+            padding-bottom: 5px;
+        }}
+        
+        .grid-item {{
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            line-height: 1.3;
+            /* Reset Flex */
+            min-width: 0;
+            width: 100%;
+        }}
+
+        .grid-label {{
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            font-weight: 700;
+            text-transform: uppercase;
+            display: inline; /* Force Inline */
+            margin-right: 6px; /* Spacing via margin */
+            white-space: nowrap;
+        }}
+
+        .grid-value {{
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            display: inline; /* Force Inline */
         }}
         
         /* Mobile Optimization */
@@ -912,12 +992,19 @@ def get_card_html(row, layout="horizontal"):
             
         return f"""<div class="modal-details-grid"><div class="modal-col">{''.join(left_col)}</div><div class="modal-col">{''.join(right_col)}</div></div>"""
 
+    # Helper for benefits (allow longer text, let CSS truncate)
+    def fmt_benefit(val):
+        if not val: return "---"
+        s = str(val).strip()
+        if s.lower() in ["not mentioned", "none", "nan", "", "n/a", "no", "0"]: return "---"
+        return s
+
     if layout == "vertical":
         # Vertical Trigger (Mini Card Style)
         trigger_html = f"""<a href="#modal-{row['id']}" class="card-link" style="text-decoration: none; color: inherit; display: block; height: 100%;"><div class="mini-card"><div class="mini-card-img-container"><img src="{image_src}" alt="{row['card_name']}"></div><h4>{row['card_name']}</h4><p style="margin-top: 5px; color: #94a3b8; font-size: 0.8rem;">{row['bank_name']}</p></div></a>"""
     else:
         # Horizontal Trigger (Glass Card Style - Default)
-        trigger_html = f"""<a href="#modal-{row['id']}" class="card-link" style="text-decoration: none; color: inherit; display: block;"><div class="glass-card"><div class="card-content"><div class="card-image-container"><img src="{image_src}" class="card-img" alt="{row['card_name']}"></div><div class="card-details"><div class="card-header"><p class="card-bank">{row['bank_name']}</p><h4 class="card-title">{row['card_name']}</h4></div><div class="stats-grid"><div class="stat-item"><span class="stat-label">Fee</span><span class="stat-value">{fmt(row['annual_fee'])}</span></div><div class="stat-item"><span class="stat-label">Min Salary</span><span class="stat-value">{fmt(row['minimum_salary_requirement'])}</span></div></div><div class="card-benefits"><span class="benefit-tag">✨ {str(row['welcome_bonus'])[:30]}...</span><span class="benefit-tag">💰 {str(row['cashback_rates'])[:30]}...</span></div></div></div></div></a>"""
+        trigger_html = f"""<a href="#modal-{row['id']}" class="card-link" style="text-decoration: none; color: inherit; display: block;"><div class="glass-card"><div class="card-content"><div class="card-image-container"><img src="{image_src}" class="card-img" alt="{row['card_name']}"></div><div class="card-details"><div class="card-header"><p class="card-bank">{row['bank_name']}</p><h4 class="card-title">{row['card_name']}</h4></div><div class="card-grid-2x2"><div class="grid-item"><span class="grid-label">Fee :</span><span class="grid-value">{fmt(row['annual_fee'])}</span></div><div class="grid-item"><span class="grid-label">Min Salary :</span><span class="grid-value">{fmt(row['minimum_salary_requirement'])}</span></div><div class="grid-item"><span class="grid-label">Welcome Bonus :</span><span class="grid-value" title="{str(row['welcome_bonus'])}">{fmt_benefit(row['welcome_bonus'])}</span></div><div class="grid-item"><span class="grid-label">Cashback :</span><span class="grid-value" title="{str(row['cashback_rates'])}">{fmt_benefit(row['cashback_rates'])}</span></div></div></div></div></div></a>"""
 
     html = f"""
 {trigger_html}

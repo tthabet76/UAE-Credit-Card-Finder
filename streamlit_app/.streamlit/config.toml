@@ -1,7 +1,7 @@
 [theme]
-base = "light"
-primaryColor = "#0056b3" # Trustworthy Blue
-backgroundColor = "#f4f7f6" # Light Gray
-secondaryBackgroundColor = "#ffffff" # White
-textColor = "#333333"
+base = "dark"
+primaryColor = "#06b6d4" # Cyan Accent
+backgroundColor = "#0f172a" # Dark Slate
+secondaryBackgroundColor = "#1e293b" # Slightly Lighter Slate
+textColor = "#f8fafc" # Off-white
 font = "sans serif"
