@@ -6,7 +6,7 @@ from supabase import create_client, Client
 
 # --- FEATURE FLAGS ---
 # Set to FALSE to revert to Local SQLite (The "Safety Net")
-SUPABASE_ENABLED = True 
+SUPABASE_ENABLED = False 
 
 # --- CONFIGURATION ---
 DB_FILE = 'credit_card_data.db'
@@ -92,3 +92,31 @@ def fetch_card_by_id(card_id):
 def log_interaction(card_url, user_query, ai_response, status="SUCCESS"):
     """Logs the AI interaction."""
     pass
+
+def fetch_raw_text(card_url):
+    """Fetches the raw page text used by the LLM for a specific URL."""
+    if SUPABASE_ENABLED:
+        try:
+            client = get_supabase_client()
+            if client:
+                # We order by timestamp desc to get the latest run
+                resp = client.table("llm_interaction_log").select("raw_page_text").eq("card_url", card_url).order("run_timestamp", desc=True).limit(1).execute()
+                if resp.data and resp.data[0].get('raw_page_text'):
+                    return resp.data[0]['raw_page_text']
+        except Exception as e:
+            pass # Fallback
+
+    # Local Mode
+    conn = get_db_connection()
+    if conn:
+        try:
+            cursor = conn.cursor()
+            # Order by id desc usually implies latest if timestamp is messy
+            cursor.execute("SELECT raw_page_text FROM llm_interaction_log WHERE card_url = ? ORDER BY id DESC LIMIT 1", (card_url,))
+            row = cursor.fetchone()
+            conn.close()
+            return row['raw_page_text'] if row else None
+        except Exception as e:
+            conn.close()
+            return None
+    return None

@@ -35,7 +35,7 @@ bank_listing_urls = {
     "CBD": "https://www.cbd.ae/personal/cards/credit-cards",
     "CBI": "https://www.cbiuae.com/en/personal/products-and-services/cards/",
     "Citibank": "https://www.citibank.ae/credit-cards",
-    "DIB": "https://www.dib.ae/personal/cards/?cardType=credit-cards&incomeMax=Any&incomeMin=Any&cardBenefit=All-Benefits&visible=24",
+    "DIB": "https://www.dib.ae/personal/cards/?cardType=credit-cards&incomeMax=Any&incomeMin=Any&cardBenefit=All-Benefits&visible=100",
     "Dubai First": "https://www.dubaifirst.com/en-ae",
     "Emirates Islamic": "https://www.emiratesislamic.ae/en/personal-banking/cards/credit-cards",
     "Emirates NBD": "https://www.emiratesnbd.com/en/cards/credit-cards",
@@ -108,7 +108,10 @@ def discover_cards_from_listing(bank_name, listing_url):
         # Smart Wait: Wait for body to be present, then a small buffer
         try:
             WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.TAG_NAME, "body")))
-            time.sleep(3) # Short buffer for dynamic content
+            if bank_name == "NBF":
+                 time.sleep(10) # NBF needs more time for Elementor
+            else:
+                 time.sleep(3) # Short buffer for dynamic content
         except:
             print(f"  Timeout waiting for {bank_name} page load.")
 
@@ -149,6 +152,9 @@ def discover_cards_from_listing(bank_name, listing_url):
                     if not netloc.startswith('www.'):
                         netloc = 'www.' + netloc
                     full_url = urlunparse(('https', netloc, p.path, p.params, p.query, p.fragment))
+                    
+                    if 'services' in full_url.lower():
+                        continue
                     card_name = name_element.text.strip()
                     found_cards.append({'url': full_url, 'name': card_name})
 
@@ -172,11 +178,22 @@ def discover_cards_from_listing(bank_name, listing_url):
                     found_cards.append({'url': full_url, 'name': title_element.text.strip()})
 
         elif bank_name == "HSBC":
-            card_containers = soup.find_all('li', class_='M-CNT-ITEM-ART-DEV')
+            # Search both Content items and Hero items (Featured cards)
+            card_containers = soup.find_all(['li', 'div'], class_=['M-CNT-ITEM-ART-DEV', 'M-HERO-ART-DEV'])
             for container in card_containers:
-                link_element = container.find('h3', class_='link-header').find('a')
-                if link_element and '/compare/' not in link_element.get('href', ''):
-                    full_url = urljoin(listing_url, link_element['href'])
+                header_element = container.find('h3', class_='link-header')
+                # Hero items might use h1 or h2
+                if not header_element:
+                     header_element = container.find(['h1', 'h2', 'h3'])
+                     
+                link_element = header_element.find('a') if header_element else None
+                
+                if link_element:
+                    href = link_element.get('href', '')
+                    if '/compare/' in href or '.pdf' in href.lower():
+                        continue
+                        
+                    full_url = urljoin(listing_url, href)
                     name_element = link_element.find('span', class_='link text')
                     card_name = name_element.text.strip() if name_element else "Name Not Found"
                     found_cards.append({'url': full_url, 'name': card_name})
@@ -245,6 +262,10 @@ def discover_cards_from_listing(bank_name, listing_url):
                             link_element = read_more_span.find_parent('a')
                             if link_element and link_element.get('href'):
                                 full_url = urljoin(listing_url, link_element['href'])
+                                
+                                if 'offers-promotions' in full_url.lower():
+                                    continue
+                                    
                                 found_cards.append({'url': full_url, 'name': card_name})
         
         elif bank_name == "ADIB":
@@ -330,9 +351,31 @@ def discover_cards_from_listing(bank_name, listing_url):
             for container in card_containers:
                 title_div = container.find('div', class_='card-title-info')
                 if title_div:
-                    link_element = title_div.find('a')
+                    # [FIX] Filter out "Benefit" blocks that masquerade as cards (e.g. "Covered Cards Benefits")
+                    type_div = container.find('div', class_='card-type-info')
+                    if type_div and 'Benefits' in type_div.text:
+                        continue
+                    
+                    # [FIX] Look for Header first (h3/h4) to avoid grabbing badge links like "Complimentary Travel Coverage"
+                    name_header = title_div.find(['h3', 'h4', 'h5'])
+                    link_element = None
+                    card_name = "Name Not Found"
+
+                    if name_header:
+                        card_name = name_header.text.strip()
+                        # Often the header itself is a link, or contains a link
+                        if name_header.name == 'a':
+                            link_element = name_header
+                        else:
+                            link_element = name_header.find('a')
+                    
+                    # Fallback: If no header, or header didn't have a link (unlikely but possible), try general link find
+                    if not link_element:
+                         link_element = title_div.find('a')
+                         if not name_header and link_element:
+                             card_name = link_element.text.strip()
+
                     if link_element and link_element.get('href'):
-                        card_name = link_element.text.strip()
                         full_url = urljoin(listing_url, link_element['href'])
                         found_cards.append({'url': full_url, 'name': card_name})
             
@@ -374,6 +417,8 @@ def discover_cards_from_listing(bank_name, listing_url):
             for link in card_links:
                 href = link.get('href')
                 if href and '/en/' in href:
+                    if 'accounts' in href.lower() or 'form' in href.lower():
+                        continue
                     # Often the text is "Learn More" or "Apply Now", so we need to find the title nearby
                     # The title is usually in a sibling or parent container's h4/h5
                     card_container = link.find_parent('div', class_='card-item') # Attempt to find a container
@@ -395,6 +440,8 @@ def discover_cards_from_listing(bank_name, listing_url):
              all_links = soup.find_all('a', href=True)
              for link in all_links:
                  href = link.get('href')
+                 if href and ('payment' in href.lower() or 'about-us' in href.lower()):
+                     continue
                  if '/personal/cards/nbq-' in href and '-credit-card' in href:
                      # The text inside the link might be "Apply Now" or "Read More", so we check previous siblings for title
                      # OR sometimes the link text itself is the card name
